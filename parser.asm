@@ -91,13 +91,13 @@ table
       defb 0         		; 1 byte - Zero byte to mark end of command
       defw test         	; 2 bytes
 
-	defb 'time'      	; Command
+	defb 'time'      		; Command
       defb 0         		; 1 byte - Zero byte to mark end of command
       defw time         	; 2 bytes
 
-	defb 'date'      	; Command
+	defb 'date'      		; Command
       defb 0         		; 1 byte - Zero byte to mark end of command
-      defw date         	; 2 bytes
+      defw dates         	; 2 bytes
 
    	defb '@'         		; Signifies table end reached
 
