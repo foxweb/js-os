@@ -9,7 +9,7 @@ C:\IAR\z80\bin\az80.exe starter.asm
 C:\IAR\z80\bin\xlink.exe -f starter.xcl starter.r01
 del starter.r01
 
-copy /b header.bin + starter.bin "boot/js-os.$C"
+copy /b header.bin + starter.bin "build/js-os.$C"
 del starter.bin
 
 echo.
