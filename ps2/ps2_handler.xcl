@@ -1,0 +1,7 @@
+// xcl-file for assembler-only projects
+-Fraw-binary
+-cz80
+-Z(CODE)CODE=6000-7FFF
+-o ps2_handler.bin
+-l ps2_handler.map
+-xmisn

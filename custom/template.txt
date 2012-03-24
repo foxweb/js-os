@@ -1,0 +1,14 @@
+	include macros.a80
+	ORG 0
+START   DI
+	LD SP,$5FFF
+
+
+
+
+   ; Fill rest of rom with $FF
+		DUPL $3D2F-$,$FF
+		DB $00,$C9
+   
+   ; Fill rest of rom with $FF
+		DUPL $4000-$,$FF

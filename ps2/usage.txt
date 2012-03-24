@@ -1,0 +1,57 @@
+;START
+        CALL INIT
+
+;INITIALIZING INTERRUPTS:
+INTA    LD HL,I_N_T
+        LD (#5BFF),HL
+        DI
+        LD A,#5B,I,A
+        IM 2
+
+;MAIN CYCLE:
+MAIN    EI
+        HALT
+        CALL SPKE;poll for pressing SPACE
+        JR Z,MAIN;Z - not pressed, NZ - pressed
+        RET
+;-------------------------------
+;initialization:
+INIT    LD BC,#EFF7
+        LD A,#80
+        OUT A
+        LD BC,#DFF7
+        LD A,#F0
+        OUT A
+        LD BC,#BFF7
+        LD A,#02
+        OUT A
+        RET
+;-------------------------------
+;INTERRUPT HANDLER:
+I_N_T   PUSH AF
+        PUSH BC
+        PUSH DE
+        PUSH HL
+        PUSH IX
+        EXX
+        EX AF, AF
+        PUSH AF
+        PUSH BC
+        PUSH DE
+        PUSH HL
+
+        CALL PSDII
+
+        POP HL
+        POP DE
+        POP BC
+        POP AF
+        EXX
+        EX AF, AF
+        POP IX
+        POP HL
+        POP DE
+        POP BC
+        POP AF
+        EI
+        RET

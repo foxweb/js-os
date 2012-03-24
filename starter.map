@@ -1,0 +1,108 @@
+################################################################################
+#                                                                              #
+#      IAR Universal Linker V5.0.0.2/W32                                       #
+#                                                                              #
+#           Link time     =  24/Mar/2012  16:07:30                             #
+#           Target CPU    =  Z80/64180                                         #
+#           List file     =  starter.map                                       #
+#           Output file 1 =  "C:\Documents and Settings\Attain PD\My Documents #
+#                            \Justine\zxevo\Justines OS\starter.bin"           #
+#                            Format: raw-binary                                #
+#           Command line  =  -f starter.xcl (-Fraw-binary -cz80                #
+#                            -Z(CODE)CODE=8000-80FF -Z(CONST)BIOS=8100-C0FF    #
+#                            --image_input=js-os.bin,bios,BIOS,1 -o            #
+#                            starter.bin -l starter.map -xmisn) starter.r01    #
+#                                                                              #
+#                           Copyright (C) 1987-2010 IAR Systems AB.            #
+################################################################################
+
+
+
+
+
+                ****************************************
+                *                                      *
+                *           CROSS REFERENCE            *
+                *                                      *
+                ****************************************
+
+                  There are no program entries.
+
+
+
+
+                ****************************************
+                *                                      *
+                *              MODULE MAP              *
+                *                                      *
+                ****************************************
+
+
+  DEFINED ABSOLUTE ENTRIES
+    *************************************************************************
+
+  FILE NAME : C:\Documents and Settings\Attain PD\My Documents\Justine\zxevo\Justines OS\js-os.bin
+  PROGRAM MODULE, NAME :  Image file 0
+
+  SEGMENTS IN THE MODULE
+  ======================
+BIOS
+  Relative segment, address: 8100 - C0FF (0x4000 bytes), align: 0
+  Segment part 0.
+           ENTRY                   ADDRESS         REF BY
+           =====                   =======         ======
+           bios                    8100            Segment part 0 (starter)
+
+    *************************************************************************
+
+  FILE NAME : C:\Documents and Settings\Attain PD\My Documents\Justine\zxevo\Justines OS\starter.r01
+  PROGRAM MODULE, NAME : starter
+
+  SEGMENTS IN THE MODULE
+  ======================
+CODE
+  Relative segment, address: 8000 - 801B (0x1c bytes), align: 0
+  Segment part 0. ROOT.
+
+
+
+
+                ****************************************
+                *                                      *
+                *            MODULE SUMMARY            *
+                *                                      *
+                ****************************************
+
+Module          CODE   CONST
+------          ----   -----
+               (Rel)   (Rel)
+ Image file 0         16 384
+starter           28
+------            --  ------
+Total:            28  16 384
+
+
+                ****************************************
+                *                                      *
+                *      SEGMENTS IN ADDRESS ORDER       *
+                *                                      *
+                ****************************************
+
+
+SEGMENT              SPACE    START ADDRESS   END ADDRESS     SIZE  TYPE  ALIGN
+=======              =====    =============   ===========     ====  ====  =====
+CODE                                   8000 - 801B              1C   rel    0
+BIOS                                   8100 - C0FF            4000   rel    0
+
+                ****************************************
+                *                                      *
+                *        END OF CROSS REFERENCE        *
+                *                                      *
+                ****************************************
+
+     28 bytes of CODE  memory
+ 16 384 bytes of CONST memory
+
+Errors: none
+Warnings: none
+

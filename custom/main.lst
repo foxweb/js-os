@@ -1,0 +1,3166 @@
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 1 - 2/6/2012 19:33:43
+
+
+       1/       0 :                     ; jms-bios Date 22/01/2012
+       2/       0 :                     
+       3/       0 :                     		include macros.a80
+(1)    1/       0 :                     
+(1)    2/       0 :                     		RELAXED ON
+(1)    3/       0 :                     		CPU Z80UNDOC
+(1)    4/       0 :                     
+(1)    5/       0 :                     DZ		MACRO DEFZ
+(1)    6/       0 :                     		DB DEFZ,0
+(1)    7/       0 :                     		ENDM 
+(1)    8/       0 :                     
+(1)    9/       0 :                     DC		MACRO DEFC
+(1)   10/       0 :                     		IF STRLEN(DEFC)>1
+(1)   11/       0 :                     		DB SUBSTR(DEFC,0,STRLEN(DEFC)-1)
+(1)   12/       0 :                     		ENDIF
+(1)   13/       0 :                     		IF STRLEN(DEFC)>0
+(1)   14/       0 :                     		DB CHARFROMSTR(DEFC,STRLEN(DEFC)-1)|80H
+(1)   15/       0 :                     		ENDIF
+(1)   16/       0 :                     		ENDM
+(1)   17/       0 :                     
+(1)   18/       0 :                     SUM_HOB		MACRO STR,AA,BB,CC
+(1)   19/       0 :                     		DB STR
+(1)   20/       0 :                     		DW AA
+(1)   21/       0 :                     		DW BB
+(1)   22/       0 :                     		DB 0
+(1)   23/       0 :                     		DB CC
+(1)   24/       0 :                     $$I := 0
+(1)   25/       0 :                     $$S := 0
+(1)   26/       0 :                     		REPT 9
+(1)   27/       0 :                     $$N := CHARFROMSTR (STR,STRLEN(STR)+$$S-9)
+(1)   28/       0 :                     $$I := ($$I+$$S+$$N+($$N*256))&0XFFFF
+(1)   29/       0 :                     $$S := $$S+1
+(1)   30/       0 :                     		ENDM
+(1)   31/       0 :                     $$I := ($$I+$$S+LOW (AA)+(LOW (AA)*0X100))&0XFFFF
+(1)   32/       0 :                     $$S := $$S+1
+(1)   33/       0 :                     $$I := ($$I+$$S+HIGH (AA)+(HIGH (AA)*0X100))&0XFFFF
+(1)   34/       0 :                     $$S := $$S+1
+(1)   35/       0 :                     $$I := ($$I+$$S+LOW (BB)+(LOW (BB)*0X100))&0XFFFF
+(1)   36/       0 :                     $$S := $$S+1
+(1)   37/       0 :                     $$I := ($$I+$$S+HIGH (BB)+(HIGH (BB)*0X100))&0XFFFF
+(1)   38/       0 :                     $$S := $$S+1
+(1)   39/       0 :                     $$I := ($$I+$$S+LOW (CC)+(LOW (CC)*0X100))&0XFFFF
+(1)   40/       0 :                     $$S := $$S+1
+(1)   41/       0 :                     $$I := ($$I+$$S+HIGH (CC)+(HIGH (CC)*0X100))&0XFFFF
+(1)   42/       0 :                     $$S := $$S+1
+(1)   43/       0 :                     		DW $$I
+(1)   44/       0 :                     		ENDM
+(1)   45/       0 :                     
+(1)   46/       0 :                     DUPL		MACRO LEN,FILL
+(1)   47/       0 :                     DUPL:
+(1)   48/       0 :                     $$N		EQU (LEN) / 1024
+(1)   49/       0 :                     $$M		EQU (LEN) # 1024
+(1)   50/       0 :                     		REPT $$N
+(1)   51/       0 :                     		DB 1024 DUP(FILL)
+(1)   52/       0 :                     		ENDM
+(1)   53/       0 :                     		IF $$M <> 0
+(1)   54/       0 :                     		DB $$M DUP(FILL)
+(1)   55/       0 :                     		ENDIF
+(1)   56/       0 :                     		ENDM
+(1)   57/       0 :                     
+ AS V1.42 Beta [Bld 78] - source file main.a80(macros.a80) - page 2 - 2/6/2012 19:33:43
+
+
+(1)   58/       0 :                     HIGH		FUNCTION X,((X >> 8) & 0XFF)
+(1)   59/       0 :                     LOW		FUNCTION X,(X & 0XFF)
+(1)   60/       0 :                     
+       4/       0 :                     
+       5/       0 :                     		; TS-config extended ports definition
+       6/       0 :                     
+       7/       0 : =AFH                		extp:		equ $AF
+       8/       0 :                     
+       9/       0 : =0H                 		vconfig:	equ $00
+      10/       0 : =0H                 		status:	equ $00	;R
+      11/       0 : =1H                 		vpage:	equ $01
+      12/       0 : =2H                 		xoffsl:	equ $02
+      13/       0 : =3H                 		xoffsh:	equ $03
+      14/       0 : =4H                 		yoffsl:	equ $04
+      15/       0 : =5H                 		yoffsh:	equ $05
+      16/       0 : =6H                 		tsconfig:	equ $06
+      17/       0 : =8H                 		vconfig2:	equ $08
+      18/       0 : =FH                 		border:	equ $0F
+      19/       0 :                     
+      20/       0 : =10H                		rampage0:	equ $10
+      21/       0 : =11H                		rampage1:	equ $11
+      22/       0 : =12H                		rampage2:	equ $12
+      23/       0 : =12H                		page2:	equ $12	;R
+      24/       0 : =13H                		rampage3:	equ $13
+      25/       0 : =13H                		page3:	equ $13	;R
+      26/       0 : =14H                		nwraddr:	equ $14
+      27/       0 : =15H                		fmaddr:	equ $15
+      28/       0 : =18H                		tgpage:	equ $18
+      29/       0 : =19H                		rarrpage:	equ $19
+      30/       0 : =1AH                		dmasaddrl:	equ $1A
+      31/       0 : =1BH                		dmasaddrh:	equ $1B
+      32/       0 : =1CH                		dmasaddrx:	equ $1C
+      33/       0 : =1DH                		dmadaddrl:	equ $1D
+      34/       0 : =1EH                		dmadaddrh:	equ $1E
+      35/       0 : =1FH                		dmadaddrx:	equ $1F
+      36/       0 : =30H                		dmamaddrl:	equ $30
+      37/       0 : =31H                		dmamaddrh:	equ $31
+      38/       0 : =33H                		dmamaddrx:	equ $33
+      39/       0 : =20H                		sysconfig:	equ $20
+      40/       0 : =21H                		memconfig:	equ $21
+      41/       0 : =22H                		hsint:	equ $22
+      42/       0 : =23H                		vsintl:	equ $23
+      43/       0 : =24H                		vsinth:	equ $24
+      44/       0 : =25H                		intvect:	equ $25
+      45/       0 : =26H                		dmalen:	equ $26
+      46/       0 : =27H                		dmactrl:	equ $27
+      47/       0 : =28H                		dmanum:	equ $28
+      48/       0 : =29H                		fddvirt:	equ $29
+      49/       0 : =2AH                		xtoverride:	equ $2A
+      50/       0 :                     
+      51/       0 : =80H                		huscontrol:	equ $80
+      52/       0 : =81H                		hussamprate:	equ $81
+      53/       0 : =82H                		hustickratel:	equ $82
+      54/       0 : =83H                		hustickrateh:	equ $83
+      55/       0 : =84H                		husrld0:	equ $84
+      56/       0 : =85H                		husrld1:	equ $85
+      57/       0 : =86H                		husrld2:	equ $86
+      58/       0 : =87H                		husrld3:	equ $87
+      59/       0 : =80H                		husstatus:	equ $80	;R
+      60/       0 :                     
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 3 - 2/6/2012 19:33:43
+
+
+      61/       0 :                     ;	JMS Variables
+      62/       0 :                     
+      63/       0 : =6000H              		XYPOS:	equ $6000
+      64/       0 : =FH                 		color:	equ $0F
+      65/       0 : =6002H              		buffer:	equ $6002
+      66/       0 :                     
+      67/       0 :                     		ORG 0
+      68/       0 : F3                  START   	DI
+      69/       1 : 31 FF 5F            		LD SP,$5FFF		; Set stack pointer to $5FFF
+      70/       4 : CD 70 00            		CALL LOAD_FONT
+      71/       7 : CD 83 00            		CALL CLS
+      72/       A : CD 98 00            		CALL SET_MODE
+      73/       D : 06 0F               		LD 	B,color
+      74/       F : 11 1E 00            		LD 	DE,$001E		; Set XYPOS D - Y , E - X
+      75/      12 : ED 53 00 60         		LD	(XYPOS),DE
+      76/      16 : 21 4F 0A            		LD	HL,TEXT
+      77/      19 : CD A6 00            		CALL PRINT_STRING
+      78/      1C : 06 01               		LD	B,color-14
+      79/      1E : 11 00 02            		LD 	DE,$0200		; Set XYPOS D - Y , E - X
+      80/      21 : ED 53 00 60         		LD	(XYPOS),DE
+      81/      25 : 21 6C 0A            		LD	HL,TEXT_TWO
+      82/      28 : CD A6 00            		CALL PRINT_STRING
+      83/      2B :                     
+      84/      2B : 21 00 C5            		LD	HL,$C500	; Display first 90 characters from font on line 0
+      85/      2E : 3E 00               		LD	A,$0
+      86/      30 : 77                  LOOP1       LD      (HL),A
+      87/      31 : CB FD               		SET     7,L		; Set color
+      88/      33 : 36 05                       	LD      (HL),color-10
+      89/      35 : CB BD                       	RES     7,L		; End of set color
+      90/      37 : 23                  		INC	HL
+      91/      38 : 3C                  		INC	A
+      92/      39 : FE 5A               		CP	$5A
+      93/      3B : DA 30 00            		JP	C,LOOP1
+      94/      3E : 21 00 C6            		LD	HL,$C600	; Display next 90 characters from font on line 1
+      95/      41 : 77                  LOOP2       LD      (HL),A
+      96/      42 : CB FD               		SET     7,L		; Set color
+      97/      44 : 36 0A                       	LD      (HL),color-5
+      98/      46 : CB BD                       	RES     7,L		; End of set color
+      99/      48 : 23                  		INC	HL
+     100/      49 : 3C                  		INC	A
+     101/      4A : FE B5               		CP	$B5
+     102/      4C : DA 41 00            		JP	C,LOOP2
+     103/      4F : 21 00 C7            		LD	HL,$C700	; Display last 75 characters from font on line 2
+     104/      52 : 77                  LOOP3       LD      (HL),A
+     105/      53 : CB FD               		SET     7,L		; Set color
+     106/      55 : 36 07                       	LD      (HL),color-8
+     107/      57 : CB BD                       	RES     7,L		; End of set color
+     108/      59 : 23                  		INC	HL
+     109/      5A : 3C                  		INC	A
+     110/      5B : FE FF               		CP	$FF
+     111/      5D : DA 52 00            		JP	C,LOOP3
+     112/      60 :                     		
+     113/      60 : 11 00 10            		LD 	DE,$1000		; Set XYPOS D - Y , E - X
+     114/      63 : ED 53 00 60         		LD	(XYPOS),DE
+     115/      67 : 06 0F               		LD 	B,color
+     116/      69 : 21 4F 0A            		LD	HL,TEXT
+     117/      6C : CD A6 00            		CALL PRINT_STRING
+     118/      6F :                     
+     119/      6F : 76                  		HALT
+     120/      70 :                     
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 4 - 2/6/2012 19:33:43
+
+
+     121/      70 :                     
+     122/      70 :                     ; Routines below here
+     123/      70 :                      
+     124/      70 : 06 13               LOAD_FONT   LD      B,rampage3		; Load font into $C000 ram page 9
+     125/      72 : 16 09                       	LD      D,$09
+     126/      74 : CD A1 00                    	CALL	SET_RAM_PAGER
+     127/      77 : 21 49 02                    	LD      HL,FONT
+     128/      7A : 11 00 C0                    	LD      DE,$C000
+     129/      7D : 01 00 08                    	LD      BC,$800
+     130/      80 : ED B0                       	LDIR
+     131/      82 : C9                  		RET
+     132/      83 :                     
+     133/      83 : 06 13               CLS       	LD      B,rampage3		; Clear screen at ram page 8
+     134/      85 : 16 08                       	LD      D,$08
+     135/      87 : CD A1 00                    	CALL	SET_RAM_PAGER
+     136/      8A : 21 00 C0                    	LD      HL,$C000
+     137/      8D : 11 01 C0                    	LD      DE,$C001
+     138/      90 : 01 FF 3F                    	LD      BC,16383
+     139/      93 : 36 00                       	LD      (HL),0
+     140/      95 : ED B0                       	LDIR
+     141/      97 : C9                  		RET
+     142/      98 :                     
+     143/      98 :                     
+     144/      98 : 21 4E 0A            SET_MODE    LD      HL,CONFIG+5	; Set video mode
+     145/      9B : 01 AF 06                    	LD      BC,$06AF
+     146/      9E : ED BB                       	OTDR
+     147/      A0 : C9                  		RET
+     148/      A1 :                     
+     149/      A1 :                     
+     150/      A1 :                     SET_RAM_PAGER			; Entry B=Port base 10-$0000 11-$4000 12-$8000 13-$C000, D=Page
+     151/      A1 : 0E AF               		LD C,extp		
+     152/      A3 : ED 51               		out (c),D	; This could be $00-$ff
+     153/      A5 : C9                  		RET
+     154/      A6 :                     
+     155/      A6 :                     
+     156/      A6 :                     PRINT_STRING		; In:    [HL] - ASCII-string , B - color , out: [A] - ASCII-character
+     157/      A6 : 7E                  		LD      A,(HL)
+     158/      A7 : 23                  		INC     HL
+     159/      A8 : B7                  		OR      A
+     160/      A9 : C8                  		RET     Z
+     161/      AA : CD B0 00            		CALL    PUTCHAR
+     162/      AD : 18 F7                     	JR      PRINT_STRING
+     163/      AF : C9                  		RET
+     164/      B0 :                     
+     165/      B0 :                     PUTCHAR        ;in:    A - char , B - color , [XYPOS], XYPOS - 2 bytes X,Y - you DO NOT need more, as 0<=X<=127, 0<=Y<=63
+     166/      B0 : E5                  		push hl
+     167/      B1 : 2A 00 60            		ld hl, (XYPOS)
+     168/      B4 : CB F4               		set 6, h
+     169/      B6 : CB FC               		set 7, h  ; here you have #C000 + Y*256 + X
+     170/      B8 : 77                  		ld (hl), a
+     171/      B9 : CB FD               		set 7, l
+     172/      BB : 70                  		ld (hl), b	; Set color
+     173/      BC : 7D                  		ld a, l
+     174/      BD : 3C                  		inc a
+     175/      BE : E6 7F               		and 127
+     176/      C0 :                     
+     177/      C0 :                     ; If X>89 then set x=0 and y=y+1
+     178/      C0 :                     
+     179/      C0 : FE 5A               		CP	$5A		; Does X = 90 if so set X = 0 and increase Y+1
+     180/      C2 : DA CD 00            		JP	C,XYTEST
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 5 - 2/6/2012 19:33:43
+
+
+     181/      C5 : 2E 00               		LD	L,$0
+     182/      C7 : 24                  		INC	H
+     183/      C8 : 22 00 60            		ld (XYPOS), hl
+     184/      CB : E1                  		pop hl
+     185/      CC : C9                  		ret
+     186/      CD :                     
+     187/      CD : 32 00 60            XYTEST	ld (XYPOS), a
+     188/      D0 : E1                  		pop hl
+     189/      D1 : C9                  		ret
+     190/      D2 :                     
+     191/      D2 : 11 00 C0            SCROLLUP	LD DE,$C000		; Copy lines 1 to 89 to 0 to 88
+     192/      D5 : 21 00 C1            		LD HL,$C100
+     193/      D8 : 01 FF 3E            		LD BC,$3EFF
+     194/      DB :                     		; Then clear bottom line 89
+     195/      DB : 21 00 E4            		ld hl,$E400		; HL = start address of block
+     196/      DE : 5D                  		ld e,l		; DE = HL + 1
+     197/      DF : 54                  		ld d,h
+     198/      E0 : 13                  		inc de
+     199/      E1 : 36 00               		ld (hl),$00		; initialise first byte of block with data byte (&00)
+     200/      E3 : 01 7F 00            		ld bc,$7F		; BC = length of block in bytes HL+BC-1 = end address of block
+     201/      E6 : ED B0               		ldir				; fill memory
+     202/      E8 : C9                  		ret
+     203/      E9 :                     
+     204/      E9 :                     		include gfx-routines.a80
+(1)    1/      E9 :                     
+(1)    2/      E9 :                     
+(1)    3/      E9 :                     ;8 bit number in a to decimal ASCII
+(1)    4/      E9 :                     ;adapted from 16 bit found in z80 Bits to 8 bit by Galandros
+(1)    5/      E9 :                     ;Example: display a=56 as "056"
+(1)    6/      E9 :                     ;input: a = number
+(1)    7/      E9 :                     ;Output: a=0,value of a in the screen
+(1)    8/      E9 :                     ;destroys af,bc (don't know about hl and de)
+(1)    9/      E9 :                     DispA:
+(1)   10/      E9 : 0E 9C               	ld	c,-100
+(1)   11/      EB : CD F5 00            	call	Na1
+(1)   12/      EE : 0E F6               	ld	c,-10
+(1)   13/      F0 : CD F5 00            	call	Na1
+(1)   14/      F3 : 0E FF               	ld	c,-1
+(1)   15/      F5 : 06 2F               Na1:	ld	b,'0'-1
+(1)   16/      F7 : 04                  Na2:	inc	b
+(1)   17/      F8 : 81                  	add	a,c
+(1)   18/      F9 : 38 FC               	jr	c,Na2
+(1)   19/      FB : 91                  	sub	c		;works as add 100/10/1
+(1)   20/      FC : F5                  	push af		;safer than ld c,a
+(1)   21/      FD : 78                  	ld	a,b		;char is in b
+(1)   22/      FE : CD B0 00            	CALL	PUTCHAR	;plot a char.
+(1)   23/     101 : F1                  	pop af		;safer than ld a,c
+(1)   24/     102 : C9                  	ret
+(1)   25/     103 :                     
+(1)   26/     103 :                     
+(1)   27/     103 :                     ;16 bit number in hl to decimal ASCII
+(1)   28/     103 :                     ;Thanks to z80 Bits
+(1)   29/     103 :                     ;inputs:	hl = number to ASCII
+(1)   30/     103 :                     ;example: hl=300 outputs '00300'
+(1)   31/     103 :                     ;destroys: af, bc, hl, de used
+(1)   32/     103 :                     DispHL:
+(1)   33/     103 : 01 F0 D8            	ld	bc,-10000
+(1)   34/     106 : CD 1C 01            	call	Num1
+(1)   35/     109 : 01 18 FC            	ld	bc,-1000
+(1)   36/     10C : CD 1C 01            	call	Num1
+ AS V1.42 Beta [Bld 78] - source file main.a80(gfx-routines.a80) - page 6 - 2/6/2012 19:33:43
+
+
+(1)   37/     10F : 01 9C FF            	ld	bc,-100
+(1)   38/     112 : CD 1C 01            	call	Num1
+(1)   39/     115 : 0E F6               	ld	c,-10
+(1)   40/     117 : CD 1C 01            	call	Num1
+(1)   41/     11A : 0E FF               	ld	c,-1
+(1)   42/     11C : 3E 2F               Num1:	ld	a,'0'-1
+(1)   43/     11E : 3C                  Num2:	inc	a
+(1)   44/     11F : 09                  	add	hl,bc
+(1)   45/     120 : 38 FC               	jr	c,Num2
+(1)   46/     122 : ED 42               	sbc	hl,bc
+(1)   47/     124 : CD B0 00            	call PUTCHAR
+(1)   48/     127 : C9                  	ret
+(1)   49/     128 :                     
+(1)   50/     128 :                     
+(1)   51/     128 :                     
+(1)   52/     128 :                     ;Display a 16- or 8-bit number in hex.
+(1)   53/     128 :                     DispHLhex:
+(1)   54/     128 :                     ; Input: HL
+(1)   55/     128 : 4C                     ld  c,h
+(1)   56/     129 : CD 2D 01               call  OutHex8
+(1)   57/     12C : 4D                     ld  c,l
+(1)   58/     12D :                     OutHex8:
+(1)   59/     12D :                     ; Input: C
+(1)   60/     12D : 79                     ld  a,c
+(1)   61/     12E : 1F                     rra
+(1)   62/     12F : 1F                     rra
+(1)   63/     130 : 1F                     rra
+(1)   64/     131 : 1F                     rra
+(1)   65/     132 : CD 36 01               call  Conv
+(1)   66/     135 : 79                     ld  a,c
+(1)   67/     136 :                     Conv:
+(1)   68/     136 : E6 0F                  and  $0F
+(1)   69/     138 : C6 90                  add  a,$90
+(1)   70/     13A : 27                     daa
+(1)   71/     13B : CE 40                  adc  a,$40
+(1)   72/     13D : 27                     daa
+(1)   73/     13E : CD B0 00               call PUTCHAR  ;replace by bcall(_PutC) or similar
+(1)   74/     141 : C9                     ret
+(1)   75/     142 :                     
+(1)   76/     142 :                     
+(1)   77/     142 :                     
+(1)   78/     142 :                     ; Combined routine for conversion of different sized binary numbers into
+(1)   79/     142 :                     ; directly printable ASCII(Z)-string
+(1)   80/     142 :                     ; Input value in registers, number size and -related to that- registers to fill
+(1)   81/     142 :                     ; is selected by calling the correct entry:
+(1)   82/     142 :                     ;
+(1)   83/     142 :                     ;  entry  inputregister(s)  decimal value 0 to:
+(1)   84/     142 :                     ;   B2D8             A                    255  (3 digits)
+(1)   85/     142 :                     ;   B2D16           HL                  65535   5   "
+(1)   86/     142 :                     ;   B2D24         E:HL               16777215   8   "
+(1)   87/     142 :                     ;   B2D32        DE:HL             4294967295  10   "
+(1)   88/     142 :                     ;   B2D48     BC:DE:HL        281474976710655  15   "
+(1)   89/     142 :                     ;   B2D64  IX:BC:DE:HL   18446744073709551615  20   "
+(1)   90/     142 :                     ;
+(1)   91/     142 :                     ; The resulting string is placed into a small buffer attached to this routine,
+(1)   92/     142 :                     ; this buffer needs no initialization and can be modified as desired.
+(1)   93/     142 :                     ; The number is aligned to the right, and leading 0's are replaced with spaces.
+(1)   94/     142 :                     ; On exit HL points to the first digit, (B)C = number of decimals
+(1)   95/     142 :                     ; This way any re-alignment / postprocessing is made easy.
+(1)   96/     142 :                     ; Changes: AF,BC,DE,HL,IX
+ AS V1.42 Beta [Bld 78] - source file main.a80(gfx-routines.a80) - page 7 - 2/6/2012 19:33:43
+
+
+(1)   97/     142 :                     ; P.S. some examples below
+(1)   98/     142 :                     
+(1)   99/     142 :                     ; by Alwin Henseler
+(1)  100/     142 :                     
+(1)  101/     142 :                     
+(1)  102/     142 : 26 00               B2D8:    LD H,0
+(1)  103/     144 : 6F                           LD L,A
+(1)  104/     145 : 1E 00               B2D16:   LD E,0
+(1)  105/     147 : 16 00               B2D24:   LD D,0
+(1)  106/     149 : 01 00 00            B2D32:   LD BC,0
+(1)  107/     14C : DD 21 00 00         B2D48:   LD IX,0          ; zero all non-used bits
+(1)  108/     150 : 22 CE 01            B2D64:   LD (B2DINV),HL
+(1)  109/     153 : ED 53 D0 01                  LD (B2DINV+2),DE
+(1)  110/     157 : ED 43 D2 01                  LD (B2DINV+4),BC
+(1)  111/     15B : DD 22 D4 01                  LD (B2DINV+6),IX ; place full 64-bit input value in buffer
+(1)  112/     15F : 21 D6 01                     LD HL,B2DBUF
+(1)  113/     162 : 11 D7 01                     LD DE,B2DBUF+1
+(1)  114/     165 : 36 20                        LD (HL)," "
+(1)  115/     167 : =166H               B2DFILC: EQU $-1         ; address of fill-character
+(1)  116/     167 : 01 12 00                     LD BC,18
+(1)  117/     16A : ED B0                        LDIR            ; fill 1st 19 bytes of buffer with spaces
+(1)  118/     16C : ED 43 E9 01                  LD (B2DEND-1),BC ;set BCD value to "0" & place terminating 0
+(1)  119/     170 : 1E 01                        LD E,1          ; no. of bytes in BCD value
+(1)  120/     172 : 21 D6 01                     LD HL,B2DINV+8  ; (address MSB input)+1
+(1)  121/     175 : 01 09 09                     LD BC,$0909
+(1)  122/     178 : AF                           XOR A
+(1)  123/     179 : 05                  B2DSKP0: DEC B
+(1)  124/     17A : 28 29                        JR Z,B2DSIZ     ; all 0: continue with postprocessing
+(1)  125/     17C : 2B                           DEC HL
+(1)  126/     17D : B6                           OR (HL)         ; find first byte <>0
+(1)  127/     17E : 28 F9                        JR Z,B2DSKP0
+(1)  128/     180 : 0D                  B2DFND1: DEC C
+(1)  129/     181 : 17                           RLA
+(1)  130/     182 : 30 FC                        JR NC,B2DFND1   ; determine no. of most significant 1-bit
+(1)  131/     184 : 1F                           RRA
+(1)  132/     185 : 57                           LD D,A          ; byte from binary input value
+(1)  133/     186 : E5                  B2DLUS2: PUSH HL
+(1)  134/     187 : C5                           PUSH BC
+(1)  135/     188 : 21 E9 01            B2DLUS1: LD HL,B2DEND-1  ; address LSB of BCD value
+(1)  136/     18B : 43                           LD B,E          ; current length of BCD value in bytes
+(1)  137/     18C : CB 12                        RL D            ; highest bit from input value -> carry
+(1)  138/     18E : 7E                  B2DLUS0: LD A,(HL)
+(1)  139/     18F : 8F                           ADC A,A
+(1)  140/     190 : 27                           DAA
+(1)  141/     191 : 77                           LD (HL),A       ; double 1 BCD byte from intermediate result
+(1)  142/     192 : 2B                           DEC HL
+(1)  143/     193 : 10 F9                        DJNZ B2DLUS0    ; and go on to double entire BCD value (+carry!)
+(1)  144/     195 : 30 03                        JR NC,B2DNXT
+(1)  145/     197 : 1C                           INC E           ; carry at MSB -> BCD value grew 1 byte larger
+(1)  146/     198 : 36 01                        LD (HL),1       ; initialize new MSB of BCD value
+(1)  147/     19A : 0D                  B2DNXT:  DEC C
+(1)  148/     19B : 20 EB                        JR NZ,B2DLUS1   ; repeat for remaining bits from 1 input byte
+(1)  149/     19D : C1                           POP BC          ; no. of remaining bytes in input value
+(1)  150/     19E : 0E 08                        LD C,8          ; reset bit-counter
+(1)  151/     1A0 : E1                           POP HL          ; pointer to byte from input value
+(1)  152/     1A1 : 2B                           DEC HL
+(1)  153/     1A2 : 56                           LD D,(HL)       ; get next group of 8 bits
+(1)  154/     1A3 : 10 E1                        DJNZ B2DLUS2    ; and repeat until last byte from input value
+(1)  155/     1A5 : 21 EA 01            B2DSIZ:  LD HL,B2DEND    ; address of terminating 0
+(1)  156/     1A8 : 4B                           LD C,E          ; size of BCD value in bytes
+ AS V1.42 Beta [Bld 78] - source file main.a80(gfx-routines.a80) - page 8 - 2/6/2012 19:33:43
+
+
+(1)  157/     1A9 : B7                           OR A
+(1)  158/     1AA : ED 42                        SBC HL,BC       ; calculate address of MSB BCD
+(1)  159/     1AC : 54                           LD D,H
+(1)  160/     1AD : 5D                           LD E,L
+(1)  161/     1AE : ED 42                        SBC HL,BC
+(1)  162/     1B0 : EB                           EX DE,HL        ; HL=address BCD value, DE=start of decimal value
+(1)  163/     1B1 : 41                           LD B,C          ; no. of bytes BCD
+(1)  164/     1B2 : CB 21                        SLA C           ; no. of bytes decimal (possibly 1 too high)
+(1)  165/     1B4 : 3E 30                        LD A,"0"
+(1)  166/     1B6 : ED 6F                        RLD             ; shift bits 4-7 of (HL) into bit 0-3 of A
+(1)  167/     1B8 : FE 30                        CP "0"          ; (HL) was > 9h?
+(1)  168/     1BA : 20 06                        JR NZ,B2DEXPH   ; if yes, start with recording high digit
+(1)  169/     1BC : 0D                           DEC C           ; correct number of decimals
+(1)  170/     1BD : 13                           INC DE          ; correct start address
+(1)  171/     1BE : 18 04                        JR B2DEXPL      ; continue with converting low digit
+(1)  172/     1C0 : ED 6F               B2DEXP:  RLD             ; shift high digit (HL) into low digit of A
+(1)  173/     1C2 : 12                  B2DEXPH: LD (DE),A       ; record resulting ASCII-code
+(1)  174/     1C3 : 13                           INC DE
+(1)  175/     1C4 : ED 6F               B2DEXPL: RLD
+(1)  176/     1C6 : 12                           LD (DE),A
+(1)  177/     1C7 : 13                           INC DE
+(1)  178/     1C8 : 23                           INC HL          ; next BCD-byte
+(1)  179/     1C9 : 10 F5                        DJNZ B2DEXP     ; and go on to convert each BCD-byte into 2 ASCII
+(1)  180/     1CB : ED 42                        SBC HL,BC       ; return with HL pointing to 1st decimal
+(1)  181/     1CD : C9                           RET
+(1)  182/     1CE :                     
+(1)  183/     1CE :                     B2DINV:  DS 8            ; space for 64-bit input value (LSB first)
+(1)  184/     1D6 :                     B2DBUF:  DS 20           ; space for 20 decimal digits
+(1)  185/     1EA :                     B2DEND:  DS 1            ; space for terminating 0
+(1)  186/     1EB :                     
+(1)  187/     1EB :                     
+(1)  188/     1EB :                             
+(1)  189/     1EB :                     
+(1)  190/     1EB :                     ;     EXAMPLES
+(1)  191/     1EB :                     ;     --------
+(1)  192/     1EB :                     
+(1)  193/     1EB :                     ;(In these examples, it is assumed there exists a subroutine PRINT, that
+(1)  194/     1EB :                     ;prints a string (terminated by a 0-byte) starting at address [HL] )
+(1)  195/     1EB :                     
+(1)  196/     1EB :                     
+(1)  197/     1EB :                     ;Print 1 byte, as follows:
+(1)  198/     1EB :                     ;20
+(1)  199/     1EB :                     ;7
+(1)  200/     1EB :                     ;145  etc.
+(1)  201/     1EB :                     ;by:   LD A,byte
+(1)  202/     1EB :                     ;      CALL B2D8
+(1)  203/     1EB :                     ;      LD HL,B2DEND-3
+(1)  204/     1EB :                     ;      CALL PRINT_STRING
+(1)  205/     1EB :                     
+(1)  206/     1EB :                     
+(1)  207/     1EB :                     ;Print a 24-bit value, as follows:
+(1)  208/     1EB :                     ;9345
+(1)  209/     1EB :                     ;76856366
+(1)  210/     1EB :                     ;534331
+(1)  211/     1EB :                     ;by:   LD E,bit23-16
+(1)  212/     1EB :                     ;      LD HL,bit15-0
+(1)  213/     1EB :                     ;      CALL B2D24
+(1)  214/     1EB :                     ;      CALL PRINT_STRING
+(1)  215/     1EB :                     
+(1)  216/     1EB :                     
+ AS V1.42 Beta [Bld 78] - source file main.a80(gfx-routines.a80) - page 9 - 2/6/2012 19:33:43
+
+
+(1)  217/     1EB :                     ;Print a 48-bit value, like
+(1)  218/     1EB :                     ;    14984366484
+(1)  219/     1EB :                     ;             49
+(1)  220/     1EB :                     ;123456789012345
+(1)  221/     1EB :                     ;        3155556 etc.
+(1)  222/     1EB :                     ;by:
+(1)  223/     1EB :                     ;      LD BC,bit47-32
+(1)  224/     1EB :                     ;      LD DE,bit31-16
+(1)  225/     1EB :                     ;      LD HL,bit15-0
+(1)  226/     1EB :                     ;      CALL B2D48
+(1)  227/     1EB :                     ;      LD HL,B2DEND-15
+(1)  228/     1EB :                     ;      CALL PRINT_STRING
+(1)  229/     1EB :                     
+(1)  230/     1EB :                     
+     205/     1EB :                     		include keyboard-routines.a80
+(1)    1/     1EB : =EFF7H              PENT_CONF   EQU $EFF7
+(1)    2/     1EB : =80H                CMOS_ON   EQU $80
+(1)    3/     1EB : =0H                 CMOS_OFF   EQU 0
+(1)    4/     1EB : =DFF7H              CMOS_SET_ADR   EQU $DFF7 
+(1)    5/     1EB : =BFF7H              CMOS_RD_WR   EQU $BFF7 
+(1)    6/     1EB :                     
+(1)    7/     1EB :                     
+(1)    8/     1EB :                     ;OPENING PS/2 PORTS:
+(1)    9/     1EB : 01 F7 EF            INIT		LD BC,$EFF7
+(1)   10/     1EE : 3E 80               		LD A,%10000000	;Decimal 128 Hex $80
+(1)   11/     1F0 : ED 79               		OUT (C),A
+(1)   12/     1F2 :                     
+(1)   13/     1F2 :                     ;ACTIVATING ACCESS to PS/2:
+(1)   14/     1F2 : 01 F7 DF                    	LD BC,$DFF7
+(1)   15/     1F5 : 3E F0               		LD A,$F0
+(1)   16/     1F7 : ED 79               		OUT (C),A
+(1)   17/     1F9 : 01 F7 BF                    	LD BC,$BFF7
+(1)   18/     1FC : 3E 02               		LD A,2
+(1)   19/     1FE : ED 79               		OUT (C),A
+(1)   20/     200 : C9                  		RET
+(1)   21/     201 :                     
+(1)   22/     201 :                     ;GET SCAN CODE:
+(1)   23/     201 : 01 F7 BF            READ_BUFFER LD BC,$BFF7
+(1)   24/     204 : ED 78                       	IN A,(C)
+(1)   25/     206 : B7                          	OR A
+(1)   26/     207 : C8                  		RET Z	;      BUFFER IS EMPTY
+(1)   27/     208 :                     
+(1)   28/     208 :                     ;CHECKING FOR OVERFLOW:
+(1)   29/     208 : FE FF                       	CP $FF
+(1)   30/     20A : CA 33 02            		JP Z,CLEARBUFFER	;   CLEAR BUFFER
+(1)   31/     20D :                             	
+(1)   32/     20D : 01 F7 BF            		LD BC,$BFF7
+(1)   33/     210 : 21 02 60                    	LD HL,buffer
+(1)   34/     213 : 77                          	LD (HL),A
+(1)   35/     214 : 23                  		INC HL
+(1)   36/     215 :                     
+(1)   37/     215 : FE E0                       	CP $E0
+(1)   38/     217 : 28 05               		JR Z,NX	;PREFIX
+(1)   39/     219 : FE F0                       	CP $F0
+(1)   40/     21B : 28 01               		JR Z,NX	;PREFIX
+(1)   41/     21D :                     
+(1)   42/     21D : C9                          	RET
+(1)   43/     21E :                     
+(1)   44/     21E : ED 78               NX      	IN A,(C)
+(1)   45/     220 : B7                          	OR A
+ AS V1.42 Beta [Bld 78] - source file main.a80(keyboard-routines.a80) - page 10 - 2/6/2012 19:33:43
+
+
+(1)   46/     221 : C8                  		RET Z
+(1)   47/     222 : 77                          	LD (HL),A
+(1)   48/     223 : 23                  		INC HL
+(1)   49/     224 : FE E0                       	CP $E0
+(1)   50/     226 : 28 05               		JR Z,NX2
+(1)   51/     228 : FE F0                       	CP $F0
+(1)   52/     22A : 28 01               		JR Z,NX2
+(1)   53/     22C :                     
+(1)   54/     22C : C9                          	RET
+(1)   55/     22D :                     
+(1)   56/     22D : ED 78               NX2     	IN A,(C)
+(1)   57/     22F : B7                          	OR A
+(1)   58/     230 : C8                  		RET Z
+(1)   59/     231 : 77                          	LD (HL),A
+(1)   60/     232 :                     
+(1)   61/     232 : C9                          	RET
+(1)   62/     233 :                     		
+(1)   63/     233 :                     		
+(1)   64/     233 : 01 F7 DF            CLEARBUFFER LD BC,$DFF7
+(1)   65/     236 : 3E 0C               		LD A,$0C
+(1)   66/     238 : ED 79               		OUT (C),A
+(1)   67/     23A : 01 F7 BF                    	LD BC,$BFF7
+(1)   68/     23D : 3E 01               		LD A,$01
+(1)   69/     23F : ED 79               		OUT (C),A
+(1)   70/     241 : 01 F7 DF                    	LD BC,$DFF7
+(1)   71/     244 : 3E F0               		LD A,$F0
+(1)   72/     246 : ED 79               		OUT (C),A
+(1)   73/     248 : C9                  		RET
+(1)   74/     249 :                     
+(1)   75/     249 :                     
+(1)   76/     249 :                     
+(1)   77/     249 :                     
+(1)   78/     249 :                     
+(1)   79/     249 :                     
+(1)   80/     249 :                     
+(1)   81/     249 :                     
+     206/     249 :                     		;include PS2.a80
+     207/     249 :                     
+     208/     249 :                     FONT		binclude jms-font.fnt
+     209/     A49 :                     
+     210/     A49 : C3 08 00 00 00 00   CONFIG  DEFB    $C3,$08,$00,$00,$00,$00	; Setup Text mode 90 x 36                
+     211/     A4F :                     
+     212/     A4F : 4A 4D 53 20 42 69   TEXT	DB "JMS Bios Version 22/01/2012",$FC,0
+                    6F 73 20 56 65 72 
+                    73 69 6F 6E 20 32 
+                    32 2F 30 31 2F 32 
+                    30 31 32 FC 00 
+     213/     A6C : 42 65 6C 6F 77 20   TEXT_TWO	DB "Below is the complete 256 Character font 2048 bytes.",0
+                    69 73 20 74 68 65 
+                    20 63 6F 6D 70 6C 
+                    65 74 65 20 32 35 
+                    36 20 43 68 61 72 
+                    61 63 74 65 72 20 
+                    66 6F 6E 74 20 32 
+                    30 34 38 20 62 79 
+                    74 65 73 2E 00 
+     214/     AA1 :                     
+     215/     AA1 :                     
+     216/     AA1 :                        ; Fill rest of rom with $FF
+     217/     AA1 : (MACRO)             		DUPL $3D2F-$,$FF
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 11 - 2/6/2012 19:33:43
+
+
+     217/     AA1 :                     DUPL:
+     217/     AA1 : =CH                 $$N             EQU ($3D2F-$) / 1024
+     217/     AA1 : =28EH               $$M             EQU ($3D2F-$) # 1024
+     217/     AA1 :                                     REPT $$N
+     217/     AA1 :                                     DB 1024 DUP($FF)
+     217/     AA1 :                                     ENDM
+     217/     AA1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 12 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 13 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/     EA1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 14 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 15 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 16 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/    12A1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 17 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 18 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 19 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/    16A1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 20 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 21 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 22 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/    1AA1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 23 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 24 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 25 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/    1EA1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 26 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 27 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 28 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/    22A1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 29 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 30 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 31 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/    26A1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 32 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 33 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/    2AA1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 34 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 35 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 36 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/    2EA1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 37 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 38 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 39 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/    32A1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 40 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 41 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 42 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/    36A1 : FF FF FF FF FF FF                   DB 1024 DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 43 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 44 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 45 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF 
+     217/    3AA1 : =>TRUE                              IF $$M <> 0
+     217/    3AA1 : FF FF FF FF FF FF                   DB $$M DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 46 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 47 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+     217/    3D2F : [217]                               ENDIF
+     218/    3D2F : 00 C9               		DB $00,$C9
+     219/    3D31 :                        
+     220/    3D31 :                        ; Fill rest of rom with $FF
+     221/    3D31 : (MACRO)             		DUPL $4000-$,$FF
+     221/    3D31 :                     DUPL:
+     221/    3D31 : =0H                 $$N             EQU ($4000-$) / 1024
+     221/    3D31 : =2CFH               $$M             EQU ($4000-$) # 1024
+     221/    3D31 :                                     REPT $$N
+     221/    3D31 :                                     DB 1024 DUP($FF)
+     221/    3D31 :                                     ENDM
+     221/    3D31 : =>TRUE                              IF $$M <> 0
+     221/    3D31 : FF FF FF FF FF FF                   DB $$M DUP($FF)
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 48 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 49 - 2/6/2012 19:33:43
+
+
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF FF 
+                    FF FF FF FF FF 
+     221/    4000 : [221]                               ENDIF
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 50 - 2/6/2012 19:33:43
+
+
+  symbol table (* = unused):
+  ------------------------
+
+*ARCHITECTURE :  i386-unknown-win32 - | *B2D16 :                        145 C |
+*B2D24 :                        147 C | *B2D32 :                        149 C |
+*B2D48 :                        14C C | *B2D64 :                        150 C |
+*B2D8 :                         142 C |  B2DBUF :                       1D6 C |
+ B2DEND :                       1EA C |  B2DEXP :                       1C0 C |
+ B2DEXPH :                      1C2 C |  B2DEXPL :                      1C4 C |
+*B2DFILC :                      166 - |  B2DFND1 :                      180 C |
+ B2DINV :                       1CE C |  B2DLUS0 :                      18E C |
+ B2DLUS1 :                      188 C |  B2DLUS2 :                      186 C |
+ B2DNXT :                       19A C |  B2DSIZ :                       1A5 C |
+ B2DSKP0 :                      179 C | *BIGENDIAN :                      0 - |
+*BRANCHEXT :                      0 - | *CASESENSITIVE :                  1 - |
+ CLEARBUFFER :                  233 C |  CLS :                           83 C |
+*CMOS_OFF :                       0 - | *CMOS_ON :                       80 - |
+*CMOS_RD_WR :                  BFF7 - | *CMOS_SET_ADR :                DFF7 - |
+ CONFIG :                       A49 C | *CONSTPI :        3.141592653589793 - |
+ Conv :                         136 C | *DATE :                    2/6/2012 - |
+*DispA :                         E9 C | *DispHL :                       103 C |
+*DispHLhex :                    128 C | *FALSE :                          0 - |
+ FONT :                         249 C | *FULLPMMU :                       1 - |
+*HAS64 :                          1 - | *HASDSP :                         0 - |
+*HASFPU :                         0 - | *HASPMMU :                        0 - |
+*INEXTMODE :                      0 - | *INIT :                         1EB C |
+*INLWORDMODE :                    0 - | *INMAXMODE :                      0 - |
+*INSRCMODE :                      0 - | *INSUPMODE :                      0 - |
+*LISTON :                         1 - |  LOAD_FONT :                     70 C |
+ LOOP1 :                         30 C |  LOOP2 :                         41 C |
+ LOOP3 :                         52 C |  M114 :                         28E - |
+ M115 :                         2CF - | *MACEXP :                         1 - |
+*MOMCPU :                      80DC - | *MOMCPUNAME :              Z80UNDOC - |
+ N114 :                           C - |  N115 :                           0 - |
+*NESTMAX :                      100 - |  NX :                           21E C |
+ NX2 :                          22D C |  Na1 :                           F5 C |
+ Na2 :                           F7 C |  Num1 :                         11C C |
+ Num2 :                         11E C |  OutHex8 :                      12D C |
+*PACKING :                        0 - | *PADDING :                        1 - |
+*PENT_CONF :                   EFF7 - |  PRINT_STRING :                  A6 C |
+ PUTCHAR :                       B0 C | *READ_BUFFER :                  201 C |
+*RELAXED :                        1 - | *SCROLLUP :                      D2 C |
+ SET_MODE :                      98 C |  SET_RAM_PAGER :                 A1 C |
+*START :                          0 C |  TEXT :                         A4F C |
+ TEXT_TWO :                     A6C C | *TIME :                    19:33:43 - |
+*TRUE :                           1 - | *VERSION :                     142F - |
+ XYPOS :                       6000 - |  XYTEST :                        CD C |
+*border :                         F - |  buffer :                      6002 - |
+ color :                          F - | *dmactrl :                       27 - |
+*dmadaddrh :                     1E - | *dmadaddrl :                     1D - |
+*dmadaddrx :                     1F - | *dmalen :                        26 - |
+*dmamaddrh :                     31 - | *dmamaddrl :                     30 - |
+*dmamaddrx :                     33 - | *dmanum :                        28 - |
+*dmasaddrh :                     1B - | *dmasaddrl :                     1A - |
+*dmasaddrx :                     1C - |  extp :                          AF - |
+*fddvirt :                       29 - | *fmaddr :                        15 - |
+*hsint :                         22 - | *huscontrol :                    80 - |
+*husrld0 :                       84 - | *husrld1 :                       85 - |
+*husrld2 :                       86 - | *husrld3 :                       87 - |
+*hussamprate :                   81 - | *husstatus :                     80 - |
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 51 - 2/6/2012 19:33:43
+
+
+*hustickrateh :                  83 - | *hustickratel :                  82 - |
+*intvect :                       25 - | *memconfig :                     21 - |
+*nwraddr :                       14 - | *page2 :                         12 - |
+*page3 :                         13 - | *rampage0 :                      10 - |
+*rampage1 :                      11 - | *rampage2 :                      12 - |
+ rampage3 :                      13 - | *rarrpage :                      19 - |
+*status :                         0 - | *sysconfig :                     20 - |
+*tgpage :                        18 - | *tsconfig :                       6 - |
+*vconfig :                        0 - | *vconfig2 :                       8 - |
+*vpage :                          1 - | *vsinth :                        24 - |
+*vsintl :                        23 - | *xoffsh :                         3 - |
+*xoffsl :                         2 - | *xtoverride :                    2A - |
+*yoffsh :                         5 - | *yoffsl :                         4 - |
+
+    140 symbols
+     95 unused symbols
+
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 52 - 2/6/2012 19:33:43
+
+
+  defined macros:
+  ---------------
+
+DC                                    | DUPL                                 
+DZ                                    | SUM_HOB                              
+
+      4 macros
+
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 53 - 2/6/2012 19:33:43
+
+
+  defined functions:
+  ------------------
+
+LOW                                   | HIGH                                 
+
+ AS V1.42 Beta [Bld 78] - source file main.a80 - page 54 - 2/6/2012 19:33:43
+
+
+  codepages:
+  ----------
+
+STANDARD (0 changed characters)
+
+
+0.03 seconds assembly time
+
+    592 lines source file
+    622 lines incl. macro expansions
+      2 passes
+      0 errors
+      0 warnings

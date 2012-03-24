@@ -1,0 +1,11 @@
+Bugs to be rectified.
+
+
+
+parser.asm 
+
+
+Putting an extra character on the end of input string does not cause an error it executes the match.
+
+
+  

@@ -1,0 +1,151 @@
+###############################################################################
+#                                                                             #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 18/Mar/2012  22:42:51        #
+#     Copyright 2001 IAR Systems. All rights reserved.                        #
+#                                                                             #
+#           Target option =  z80                                              #
+#           Source file   =  example.asm                                      #
+#           List file     =  example.lst                                      #
+#           Object file   =  example.r01                                      #
+#           Command line  =  example.asm -l example.lst                       #
+#                                                                             #
+###############################################################################
+
+      1    0000AF          Vmod    EQU h'00AF; video mode
+      2    0001AF          Vpag    EQU h'01AF; video page
+      3    000000          
+      4    0010AF          PW0     EQU h'10AF; window at #0000
+      5    0011AF          PW1     EQU h'11AF; window at #4000
+      6    0012AF          PW2     EQU h'12AF; window at #8000
+      7    0013AF          PW4     EQU h'13AF; window at #C000
+      8    000000          
+      9    000000                  rseg CODE
+     10    000000                          
+     11    000000                          ORG 0; #6000
+     12    000000          ;---------------------------------------
+     13    000000 01AF00                   LD BC, Vmod
+     14    000003 3E03                     LD A, %00000011; txt mode 80x25
+     15    000005 ED79                     OUT (C), A
+     16    000007                          
+     17    000007 01AF01                   LD BC, Vpag
+     18    00000A 3EF8                     LD A, h'F8; set video page:
+                                                      0
+     19    00000C ED79                     OUT (C), A
+     20    00000E          
+     21    00000E 01AF13                   LD BC, PW4
+     22    000011 3EF9                     LD A, h'F9; place page 1 to
+                                                      #C000
+     23    000013 ED79                     OUT (C), A
+     24    000015          
+     25    000015          ;copying font to page 1:
+     26    000015 21....                   LD HL, font8
+     27    000018 1100C0                   LD DE, h'C000
+     28    00001B 010008                   LD BC, 2048
+     29    00001E EDB0                     LDIR
+     30    000020                          
+     31    000020 01AF13                   LD BC, PW4
+     32    000023 3EF8                     LD A, h'F8; place page 0 to
+                                                      #C000
+     33    000025 ED79                     OUT (C), A
+     34    000027          ;---------------------------------------
+     35    000027          ;OPENING PS/2 PORTS:
+     36    000027 01F7EF           LD BC, h'EFF7
+     37    00002A 3E80                     LD A, %10000000
+     38    00002C ED79                     OUT (C), A
+     39    00002E          
+     40    00002E          ;ACTIVATING ACCESS to PS/2:
+     41    00002E 01F7DF           LD BC, h'DFF7
+     42    000031 3EF0                     LD A, h'F0
+     43    000033 ED79                     OUT (C), A
+     44    000035                          
+     45    000035 01F7BF           LD BC, h'BFF7
+     46    000038 3E02                     LD A, 2
+     47    00003A ED79                     OUT (C), A
+     48    00003C          ;---------------------------------------
+     49    00003C          ;INITIALIZING INTERRUPTS:
+     50    00003C F3                       DI
+     51    00003D 21....                   LD HL, I_N_T
+     52    000040 22FF5B                   LD (h'5BFF), HL
+     53    000043 3E5B             LD A, h'5B
+     54    000045 ED47                     LD I, A
+     55    000047 ED5E             IM 2
+     56    000049          ;---------------------------------------
+     57    000049          ;clearing screen:
+     58    000049 3E07                     LD A, %00000111; paper(black) +
+                                                           ink(white)
+     59    00004B 2100C0                   LD HL, h'C000
+     60    00004E 1101C0                   LD DE, h'C000+1
+     61    000051                          
+     62    000051 0619                     LD B, 25; 25 lines to clear
+     63    000053 C5       SCREEN  PUSH BC
+     64    000054 3620                     LD (HL), ' '
+     65    000056 018000                   LD BC, 128
+     66    000059 EDB0                     LDIR; fill line (symbols)
+     67    00005B                          
+     68    00005B 77                       LD (HL), A; A - color
+     69    00005C 018000                   LD BC, 128
+     70    00005F EDB0                     LDIR; fill line (attributes)
+     71    000061 C1                       POP BC
+     72    000062 10EF                     DJNZ SCREEN
+     73    000064          ;---------------------------------------
+     74    000064          ;initialization for inputing string:
+     75    000064 2100C0                   LD HL, h'C000; address on screen
+                                                         (first line)
+     76    000067 110008                   LD DE, h'0800;curMAX + curNOW
+     77    00006A          ;curMAX - lenght of editing string
+     78    00006A          ;curNOW - cursor starting position
+     79    00006A 3EFF                     LD A, h'FF; #FF - initialization
+     80    00006C CD....                   CALL ISTR
+     81    00006F                          
+     82    00006F          ;-------
+     83    00006F FB       MAIN    EI
+     84    000070 76                       HALT
+     85    000071                          
+     86    000071          ;if ENTER pressed then exit:
+     87    000071 CD....                   CALL ENKE
+     88    000074 2006                     JR NZ,EXIT
+     89    000076          
+     90    000076          ;editing string:
+     91    000076 AF                       XOR A; 0 - inputing
+     92    000077 CD....                   CALL ISTR
+     93    00007A 18F3                     JR MAIN
+     94    00007C          ;-------
+     95    00007C          
+     96    00007C          EXIT
+     97    00007C C9                       RET
+     98    00007D          ;---------------------------------------
+     99    00007D          ;INTERRUPT HANDLER:
+    100    00007D DDE5     I_N_T   PUSH IX
+    101    00007F F5                       PUSH AF
+    102    000080 E5               PUSH HL
+    103    000081 D5                       PUSH DE
+    104    000082 C5                       PUSH BC
+    105    000083 08                       EX AF, AF
+    106    000084 F5                       PUSH AF
+    107    000085                          
+    108    000085 CD....                   CALL PSDII
+    109    000088                          
+    110    000088 F1                       POP AF
+    111    000089 08                       EX AF, AF
+    112    00008A C1                       POP BC
+    113    00008B D1                       POP DE
+    114    00008C E1                       POP HL
+    115    00008D F1                       POP AF
+    116    00008E DDE1                     POP IX
+    117    000090 FB                       EI
+    118    000091 C9                       RET
+    119    000092          ;---------------------------------------
+    120    000092          
+    121    000092          #include "ps2_handler.asm"
+    122    000000          extern    font8
+    123    000448                          end
+##############################
+#          CRC:AB38          #
+#        Errors:   0         #
+#        Warnings: 0         #
+#        Bytes: 1072         #
+##############################
+
+
+
+

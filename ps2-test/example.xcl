@@ -1,0 +1,9 @@
+// xcl-file for assembler-only projects
+-Fraw-binary
+-cz80
+-Z(CODE)CODE=6000-7FFF
+-Z(CONST)FONT8=6000-7FFF
+--image_input=866_code.fnt,font8,FONT8,1
+-o example.bin
+-l example.map
+-xmisn
