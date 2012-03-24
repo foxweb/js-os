@@ -2,11 +2,11 @@
 #                                                                              #
 #      IAR Universal Linker V5.0.0.2/W32                                       #
 #                                                                              #
-#           Link time     =  24/Mar/2012  16:07:30                             #
+#           Link time     =  24/Mar/2012  18:05:09                             #
 #           Target CPU    =  Z80/64180                                         #
 #           List file     =  starter.map                                       #
 #           Output file 1 =  "C:\Documents and Settings\Attain PD\My Documents #
-#                            \Justine\zxevo\Justines OS\starter.bin"           #
+#                            \Justine\zxevo\js-os\starter.bin"                 #
 #                            Format: raw-binary                                #
 #           Command line  =  -f starter.xcl (-Fraw-binary -cz80                #
 #                            -Z(CODE)CODE=8000-80FF -Z(CONST)BIOS=8100-C0FF    #
@@ -41,7 +41,7 @@
   DEFINED ABSOLUTE ENTRIES
     *************************************************************************
 
-  FILE NAME : C:\Documents and Settings\Attain PD\My Documents\Justine\zxevo\Justines OS\js-os.bin
+  FILE NAME : C:\Documents and Settings\Attain PD\My Documents\Justine\zxevo\js-os\js-os.bin
   PROGRAM MODULE, NAME :  Image file 0
 
   SEGMENTS IN THE MODULE
@@ -55,7 +55,7 @@ BIOS
 
     *************************************************************************
 
-  FILE NAME : C:\Documents and Settings\Attain PD\My Documents\Justine\zxevo\Justines OS\starter.r01
+  FILE NAME : C:\Documents and Settings\Attain PD\My Documents\Justine\zxevo\js-os\starter.r01
   PROGRAM MODULE, NAME : starter
 
   SEGMENTS IN THE MODULE
