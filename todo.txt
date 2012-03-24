@@ -1,0 +1,7 @@
+TODO
+
+make cursor flash routine
+
+Make command line input routine
+
+make fat32 nemo-ide sd routines
