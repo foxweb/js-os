@@ -1,5 +1,7 @@
 TODO:
 
+Sort out variables 
+
 make cursor flash routine
 
 Make command line input routine
