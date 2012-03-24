@@ -1,6 +1,6 @@
 ###############################################################################
 #                                                                             #
-#     IAR Systems Z80/64180 Assembler V4.06A/W32 24/Mar/2012  19:19:25        #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 24/Mar/2012  19:33:06        #
 #     Copyright 2001 IAR Systems. All rights reserved.                        #
 #                                                                             #
 #           Target option =  z80                                              #
@@ -10,6 +10,28 @@
 #           Command line  =  js-os.asm -l js-os.lst                           #
 #                                                                             #
 ###############################################################################
+
+                                           ld (XYPOS), de
+                           -------------------------^
+                           "commands\time.asm",8  Error[50]: Undefined
+                 symbol:'XYPOS'
+                                     ld (charcol), a
+                           -----------------------------------------^
+                           "commands\time.asm",9  Error[50]: Undefined
+                 symbol:'charcol'
+                                     ld (charcol), a
+                           -------------------------^
+                           "macro.asm",133 <- macro line location
+                           "commands\time.asm",9  Error[50]: Undefined
+                 symbol:'PRINT_MSG'
+                                   call PRINT_MSG
+                           ----------------------^
+                           "macro.asm",135 <- macro line location
+                                           call PUTCHAR
+                           ----------------------------^
+                           "commands\time.asm",15  Error[50]: Undefined
+                 symbol:'PUTCHAR'
+
 
       1    005B00          
       2    005B00          ; ------- external modules
@@ -206,21 +228,20 @@
     170    000421          #include "maths-routines.asm"
     171    000511          #include "parser.asm"
     172    000586          #include "ps2_handler.asm"
-    173    00093B          #include "commands.asm"
-    174    000982          #include "booter.asm"
-    175    001089          #include "arrays.asm"
-    176    00168A          #include "restarts.asm"
-    177    000068          ;#include "commands/test.asm"
-    178    000068          ;#include "commands/time.asm"
+    173    00093B          ;#include "commands.asm"
+    174    00093B          #include "commands\test.asm"
+    175    000949          #include "commands\time.asm"
+    176    00098C          #include "booter.asm"
+    177    001093          #include "arrays.asm"
+    178    001694          #include "restarts.asm"
     179    000068          
     180    000068          
     181    000068          
     182    000068                  end
 ##############################
-#          CRC:B2AF          #
-#        Errors:   0         #
+#        Errors:   4         #
 #        Warnings: 0         #
-#        Bytes: 5642         #
+#        Bytes: 5639         #
 ##############################
 
 
