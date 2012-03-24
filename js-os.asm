@@ -5,6 +5,7 @@ extern    font8
 #include "macro.asm"
 #include "vars.asm"
 
+
 ; ------- main code
         	rseg CODE
 
@@ -173,6 +174,8 @@ nvramloop
 #include "booter.asm"
 #include "arrays.asm"
 #include "restarts.asm"
+;#include "commands/test.asm"
+;#include "commands/time.asm"
 
 
 
