@@ -95,6 +95,10 @@ table
       defb 0         		; 1 byte - Zero byte to mark end of command
       defw time         	; 2 bytes
 
+	defb 'date'      	; Command
+      defb 0         		; 1 byte - Zero byte to mark end of command
+      defw date         	; 2 bytes
+
    	defb '@'         		; Signifies table end reached
 
  
