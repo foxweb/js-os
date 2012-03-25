@@ -4,9 +4,8 @@
 
 
 dates
-
-	  	ld de, h'1800		; Set Y=24 , X=0 Change these two lines when finished to just read cursor_y
-		ld (cursor_y),de
+	  	
+		ld de, (cursor_y)
 		ld hl, M_DATE
 		call os_print_string
 		ld e, h'07
