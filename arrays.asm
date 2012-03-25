@@ -34,88 +34,6 @@ M_SYNTAX	defb 'Syntax error - Invalid command', h'0d, 0
 
 M_test	defb 'This command works......', h'0d, 0
 
-; ------- tabs
-; -- options tab
-OPTTAB0
-        defw h'0707     ; X, Y coord of box
-        defw h'0E20     ; X, Y size of box
-        defw h'0A0A     ; X, Y coord of list top
-        defw h'080C     ; X, Y coord of header text
-        defb h'8C       ; attrs
-        defb 9          ; number of options
-        defb 'Select NVRAM options:', 0
-
-		defw OPT_CFQ, SEL_CFQ   ; address of option desc, address of option choices
-		defw OPT_80L, SEL_80L
-		defw OPT_B1T, SEL_BOT
-		defw OPT_B1B, SEL_BTB
-		defw OPT_B2T, SEL_BOT
-		defw OPT_B2B, SEL_BTB
-		defw OPT_B1D, SEL_BDV
-		defw OPT_AFQ, SEL_AFQ
-		defw OPT_ZPL, SEL_ZPL
-
-; -- option text
-; byte - number of choices
-; byte - address in NVRAM
-; string - option
-OPT_CFQ    defb 3, low(cfrq), 'CPU speed, MHz:', 0
-OPT_80L    defb 3, low(l128), '128k Lock:', 0
-OPT_B1T    defb 5, low(b1to), 'Reset to:', 0
-OPT_B1B    defb 4, low(b1tb), '  bank:', 0
-OPT_B2T    defb 5, low(b2to), 'CS Reset to:', 0
-OPT_B2B    defb 4, low(b2tb), '  bank:', 0
-OPT_B1D    defb 4, low(bdev), 'Boot Device:', 0
-OPT_AFQ    defb 4, low(ayfr), 'AY clock, MHz:', 0
-OPT_ZPL    defb 6, low(zpal), 'ZX Palette:', 0
-
-; -- choices
-; string - choice
-SEL_CFQ
-		defb ' 3.5', 0
-        defb ' 7.0', 0
-		defb '14.0', 0
-
-SEL_BOT
-		defb '   ROM #00', 0
-		defb '   ROM #04', 0
-		defb '   RAM #'
-        hex8 vrompage
-        defb 0
-		defb 'BD boot.$c', 0
-		defb 'BD sys.rom', 0
-
-SEL_BTB
-        defb '    TR-DOS', 0
-		defb '  Basic 48', 0
-		defb ' Basic 128', 0
-		defb '       SYS', 0
-
-SEL_BDV
-        defb 'SD Z-contr', 0
-        defb 'HDD Master', 0
-        defb ' HDD Slave', 0
-        defb '    RS-232', 0
-
-SEL_80L
-        defb ' OFF', 0
-		defb '  ON', 0
-		defb 'Auto', 0
-
-SEL_AFQ
-        defb '1.750', 0
-		defb '1.773', 0
-		defb '3.500', 0
-		defb '3.546', 0
-
-SEL_ZPL
-        defb 'Default', 0   ; 0
-		defb 'B.black', 0   ; 1
-		defb '   Pale', 0   ; 2
-		defb '   Dark', 0   ; 3
-		defb 'Grayscl', 0   ; 4
-		defb ' Custom', 0   ; 5
-
 
 ; -- palette
 pal_bb               ; bright black
@@ -275,12 +193,6 @@ pal_64c
         defw h'6310
         defw h'6318
         
-keys_norm
-        defb 0, 'zxcvasdfgqwert1234509876poiuy', 13, 'lkjh ', 14, 'mnb'
-keys_caps
-        defb 0, 'ZXCVASDFGQWERT', 7, 6, 4, 5, 8, 12, 15, 9, 11, 10, 'POIUY', 13, 'LKJH ', 14, 'MNB'
-keys_symb
-        defb 0, ':`?/~|\\{}   <>!@#$%_)(', 39, '&', 34, '; ][', 13, '=+-^ ', 14, '.,*'
 
 sysvar_start
         defb h'FF,h'00,h'23,h'0D,h'44,h'05,h'0B,h'44,h'00,h'10,h'01,h'00,h'00,h'00,h'16,h'07
