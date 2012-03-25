@@ -81,7 +81,7 @@ table
 
       defb 'cls'      		; Command
       defb 0         		; 1 byte - Zero byte to mark end of command
-      defw cls_text      	; 2 bytes
+      defw cls      		; 2 bytes
           
       defb 'textmode'      	; Command
       defb 0         		; 1 byte - Zero byte to mark end of command

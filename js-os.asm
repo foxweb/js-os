@@ -173,6 +173,7 @@ nvramloop
 #include "commands/test.asm"
 #include "commands/time.asm"
 #include "commands/date.asm"
+#include "commands/cls.asm"
 #include "booter.asm"
 #include "arrays.asm"
 #include "restarts.asm"

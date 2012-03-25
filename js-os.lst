@@ -1,6 +1,6 @@
 ###############################################################################
 #                                                                             #
-#     IAR Systems Z80/64180 Assembler V4.06A/W32 24/Mar/2012  21:06:14        #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 25/Mar/2012  18:19:57        #
 #     Copyright 2001 IAR Systems. All rights reserved.                        #
 #                                                                             #
 #           Target option =  z80                                              #
@@ -207,20 +207,21 @@
     171    000511          #include "parser.asm"
     172    00058D          #include "ps2_handler.asm"
     173    000942          #include "commands/test.asm"
-    174    000950          #include "commands/time.asm"
-    175    000989          #include "commands/date.asm"
-    176    0009CC          #include "booter.asm"
-    177    0010D3          #include "arrays.asm"
-    178    0016D4          #include "restarts.asm"
-    179    000068          
+    174    00094D          #include "commands/time.asm"
+    175    000983          #include "commands/date.asm"
+    176    0009C3          #include "commands/cls.asm"
+    177    0009D1          #include "booter.asm"
+    178    0010D8          #include "arrays.asm"
+    179    0016D9          #include "restarts.asm"
     180    000068          
     181    000068          
-    182    000068                  end
+    182    000068          
+    183    000068                  end
 ##############################
-#          CRC:AD5F          #
+#          CRC:DD41          #
 #        Errors:   0         #
 #        Warnings: 0         #
-#        Bytes: 5716         #
+#        Bytes: 5721         #
 ##############################
 
 
