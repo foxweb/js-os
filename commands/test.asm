@@ -4,8 +4,7 @@
 
 test
 
-     		ld de, h'1800		; Set Y=24 , X=0
-		ld (cursor_y), de
+		ld de, (cursor_y)
 		ld hl, M_test
 		call os_print_string
 		ret
