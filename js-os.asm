@@ -1,4 +1,3 @@
-
 ; ------- external modules
 extern    font8
 #include "conf.asm"
@@ -28,6 +27,7 @@ START
 		ld b,h'12
 		ld d, h'2
 		call set_ram_pager
+		call LD_64_PAL		; Load default 64 colour palette
 		ld hl, h'c003		; Hopefully set 360x288 text ?
 		call set_video_mode
 		ld b,h'13
