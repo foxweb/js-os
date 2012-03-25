@@ -422,3 +422,55 @@ LD_64_PAL
 
 ;---------------------------------------------------------------------------------
 
+; Flash the cursor at the current cursor position if cursorstatus = 1
+
+cursor_flash
+		ld a, (cursorstatus)
+		or a
+		ret z
+		ld de, (cursor_y)
+		call get_character
+		ld b, a			; Store character in B
+		ld a, '_'
+		Call os_plotchar
+		call flashtimer
+		ld a , b			
+		Call os_plotchar
+		ret
+
+;---------------------------------------------------------------------------------
+
+get_character
+
+; Get character at the current location supllied by cursor_y
+; Output A holds the character
+
+		push hl
+		ld hl, (cursor_y)		; h = x, l = y
+		set 6, h
+		set 7, h			; here you have txpage + Y*256 + X
+        	ld a, (hl)			; Get character
+		pop hl
+		ret
+
+;---------------------------------------------------------------------------------
+
+; Timer for cursor flash - Input from cursorflashtimer values 0 - 255 valid
+
+flashtimer
+		
+		ld a, (cursorflashtimer)
+		ld d, a
+del1		ld bc, h'ffff
+del2		dec bc
+    		ld a, c
+    		or b
+    		jr nz, del2
+		dec d
+		ld a, d
+		or a
+		jr nz, del1
+		ret
+
+;---------------------------------------------------------------------------------
+

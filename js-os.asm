@@ -38,7 +38,12 @@ START
 		ld (border_colour), a
 		call set_border
 		
- 
+ ; setup system variable
+
+		ld a, 1
+		ld (cursorstatus), a
+		ld a, 100
+		ld (cursorflashtimer), a
 
 		
  CALL INIT	; Initialise PS2 keyboard interface.
@@ -97,25 +102,7 @@ I_N_T   	PUSH AF
 		
 ;MAIN CYCLE:
 MAIN    	EI   
-		ld de, h'1400		; Set Y=20 , X=45
-	  	ld (cursor_y), de
-		ld a, '1'
-		Call os_plotchar
-		ld a, '2'
-		Call os_plotchar
-		ld de, h'141f		; Set Y=20 , X=31
-	  	ld (cursor_y), de
-		ld a, '3'
-		Call os_plotchar
-		ld a, (OS_window_cols)
-		sub 1
-		ld d, h'14
-		ld e, a
-		;ld de, h'141f		; Set Y=20 , X=31
-	  	ld (cursor_y), de
-		ld a, '4'			
-		Call os_plotchar
-
+		
 		ld a,h'0C			; Set charcol variable to default value
         	ld (current_pen),a
 		ld de, h'0000		; Set Y=0 , X=0
@@ -140,7 +127,10 @@ MAIN1		ld de, h'0A00		; Set Y=10 , X=0
 		Call os_plotchar
 nvramloop	
 
-				
+		ld de, h'1400		; Set Y=5 , X=0
+	  	ld (cursor_y), de
+		call cursor_flash
+		
 		
 		ld de, h'0500		; Set Y=5 , X=0
 	  	ld (cursor_y), de
