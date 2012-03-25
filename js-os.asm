@@ -125,13 +125,9 @@ MAIN1		ld de, h'0A00		; Set Y=10 , X=0
 		CALL CLAVA	;poll for key press
         	JR Z, nvramloop	;Z - not pressed, NZ - pressed
 		Call os_plotchar
+		;call cursor_flash
 nvramloop	
 
-		ld de, h'1400		; Set Y=5 , X=0
-	  	ld (cursor_y), de
-		call cursor_flash
-		
-		
 		ld de, h'0500		; Set Y=5 , X=0
 	  	ld (cursor_y), de
 		ld hl , M_TIME

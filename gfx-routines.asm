@@ -431,11 +431,18 @@ cursor_flash
 		ld de, (cursor_y)
 		call get_character
 		ld b, a			; Store character in B
+		dec d
+		ld a, d
+		ld (cursor_x), a
 		ld a, '_'
 		Call os_plotchar
-		call flashtimer
-		ld a , b			
+		call flashtimer	
+		dec d
+		ld a, d
+		ld (cursor_x), a	
+		ld a , b
 		Call os_plotchar
+		call flashtimer
 		ret
 
 ;---------------------------------------------------------------------------------
@@ -460,16 +467,12 @@ get_character
 flashtimer
 		
 		ld a, (cursorflashtimer)
-		ld d, a
-del1		ld bc, h'ffff
-del2		dec bc
+		ld c ,a
+		ld b, h'ff
+del1		dec bc
     		ld a, c
     		or b
-    		jr nz, del2
-		dec d
-		ld a, d
-		or a
-		jr nz, del1
+    		jr nz, del1
 		ret
 
 ;---------------------------------------------------------------------------------

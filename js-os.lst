@@ -1,6 +1,6 @@
 ###############################################################################
 #                                                                             #
-#     IAR Systems Z80/64180 Assembler V4.06A/W32 25/Mar/2012  21:47:06        #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 25/Mar/2012  22:23:46        #
 #     Copyright 2001 IAR Systems. All rights reserved.                        #
 #                                                                             #
 #           Target option =  z80                                              #
@@ -159,59 +159,54 @@
     126    000140 2803                     JR Z, nvramloop ;Z - not pressed, NZ
                                                             - pressed
     127    000142 CD....                   Call os_plotchar
-    128    000145          nvramloop       
-    129    000145          
-    130    000145 110014                   ld de, h'1400           ; Set Y=5 ,
+    128    000145                          ;call cursor_flash
+    129    000145          nvramloop       
+    130    000145          
+    131    000145 110005                   ld de, h'0500           ; Set Y=5 ,
                                                                     X=0
-    131    000148 ED53035B                 ld (cursor_y), de
-    132    00014C CD....                   call cursor_flash
-    133    00014F                          
-    134    00014F                          
-    135    00014F 110005                   ld de, h'0500           ; Set Y=5 ,
-                                                                    X=0
-    136    000152 ED53035B                 ld (cursor_y), de
-    137    000156 21....                   ld hl , M_TIME
-    138    000159 CD....                   call os_print_string
-    139    00015C 1E04                     ld e, h'04
-    140    00015E CD....                   call READ_NVRAM_LOC
-    141    000161 3A005D                   ld a, (nv_buf)
-    142    000164 CD....                   call BCD_DISP
-    143    000167 3E3A                     ld a, ':'
-    144    000169 CD....                   call os_plotchar
-    145    00016C 1E02                     ld e, h'02
-    146    00016E CD....                   call READ_NVRAM_LOC
-    147    000171 3A005D                   ld a, (nv_buf)
-    148    000174 CD....                   call BCD_DISP
-    149    000177 3E3A                     ld a, ':'
-    150    000179 CD....                   call os_plotchar
-    151    00017C 1E00                     ld e, h'00
-    152    00017E CD....                   call READ_NVRAM_LOC
-    153    000181 3A005D                   ld a, (nv_buf)
-    154    000184 CD....                   call BCD_DISP
-    155    000187 C3....                   jp MAIN1
-    156    00018A                          
-    157    00018A          
-    158    00018A          #include "nvram.asm"
-    159    000218          #include "gfx-routines.asm"
-    160    000460          #include "maths-routines.asm"
-    161    000550          #include "parser.asm"
-    162    0005CC          #include "ps2_handler.asm"
-    163    000981          #include "commands/test.asm"
-    164    00098C          #include "commands/time.asm"
-    165    0009C2          #include "commands/date.asm"
-    166    000A02          #include "commands/cls.asm"
-    167    000A0E          #include "booter.asm"
-    168    001115          #include "arrays.asm"
-    169    001449          #include "restarts.asm"
-    170    000068          
-    171    000068          
-    172    000068          
-    173    000068                  end
+    132    000148 ED53035B                 ld (cursor_y), de
+    133    00014C 21....                   ld hl , M_TIME
+    134    00014F CD....                   call os_print_string
+    135    000152 1E04                     ld e, h'04
+    136    000154 CD....                   call READ_NVRAM_LOC
+    137    000157 3A005D                   ld a, (nv_buf)
+    138    00015A CD....                   call BCD_DISP
+    139    00015D 3E3A                     ld a, ':'
+    140    00015F CD....                   call os_plotchar
+    141    000162 1E02                     ld e, h'02
+    142    000164 CD....                   call READ_NVRAM_LOC
+    143    000167 3A005D                   ld a, (nv_buf)
+    144    00016A CD....                   call BCD_DISP
+    145    00016D 3E3A                     ld a, ':'
+    146    00016F CD....                   call os_plotchar
+    147    000172 1E00                     ld e, h'00
+    148    000174 CD....                   call READ_NVRAM_LOC
+    149    000177 3A005D                   ld a, (nv_buf)
+    150    00017A CD....                   call BCD_DISP
+    151    00017D C3....                   jp MAIN1
+    152    000180                          
+    153    000180          
+    154    000180          #include "nvram.asm"
+    155    00020E          #include "gfx-routines.asm"
+    156    00045D          #include "maths-routines.asm"
+    157    00054D          #include "parser.asm"
+    158    0005C9          #include "ps2_handler.asm"
+    159    00097E          #include "commands/test.asm"
+    160    000989          #include "commands/time.asm"
+    161    0009BF          #include "commands/date.asm"
+    162    0009FF          #include "commands/cls.asm"
+    163    000A0B          #include "booter.asm"
+    164    001112          #include "arrays.asm"
+    165    001446          #include "restarts.asm"
+    166    000068          
+    167    000068          
+    168    000068          
+    169    000068                  end
 ##############################
-#          CRC:18C           #
+#          CRC:F831          #
 #        Errors:   0         #
 #        Warnings: 0         #
-#        Bytes: 5065         #
+#        Bytes: 5062         #
 ##############################
 
 
