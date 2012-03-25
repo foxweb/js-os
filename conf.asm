@@ -1,4 +1,3 @@
-
 ; ------- definitions
 
 ; -- ports
@@ -58,6 +57,8 @@ dmactr          equ h'27
 dmanum          equ h'28
 fddvirt         equ h'29
 
+; TS parameters
+fm_en           equ 0x10
 
 ; video modes
 rres_256x192    equ h'00
