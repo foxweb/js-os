@@ -405,3 +405,20 @@ set_border
 
 ;---------------------------------------------------------------------------------
 
+; Load the 64 colour default palette
+
+LD_64_PAL
+
+        ld hl, pal_64c
+        xtr
+        xt palsel, pal_sel
+        xt fmaddr,  fm_en | (pal_addr >> 12)
+        ld de, pal_addr
+        ld bc, 128
+        ldir
+        xtr
+        xt fmaddr, 0
+        ret
+
+;---------------------------------------------------------------------------------
+
