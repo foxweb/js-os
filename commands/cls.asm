@@ -5,9 +5,9 @@
 
 cls
 		call cls_text
-		ld a, 0
+		xor a
 		ld (cursor_y), a
-		ld a, 0
+		xor a
 		ld (cursor_x), a
 		ret
 
