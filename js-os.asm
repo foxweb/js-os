@@ -38,12 +38,15 @@ START
 		ld (border_colour), a
 		call set_border
 		
- ; setup system variable
+ ; Setup system variables
 
 		ld a, 1
 		ld (cursorstatus), a
 		ld a, 100
 		ld (cursorflashtimer), a
+		ld de, h'0500			; Y = 5 , X = 0 setup powerup cursor position
+		ld (cursor_y), de
+
 
 		
  CALL INIT	; Initialise PS2 keyboard interface.
@@ -128,7 +131,7 @@ MAIN1		ld de, h'0A00		; Set Y=10 , X=0
 		;call cursor_flash
 nvramloop	
 
-		ld de, h'0500		; Set Y=5 , X=0
+		ld de, h'0800		; Set Y=8 , X=0
 	  	ld (cursor_y), de
 		ld hl , M_TIME
 		call os_print_string
