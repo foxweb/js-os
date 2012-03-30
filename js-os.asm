@@ -59,6 +59,20 @@ INTA    	LD HL, I_N_T
 		LD I, A
         	IM 2
 
+		;-------------------------------------------------------
+		;initialization for inputing string:
+
+		LD HL, h'C000		; address on screen (first line)
+		LD DE, h'0800		;curMAX + curNOW
+
+		;curMAX - lenght of editing string
+		;curNOW - cursor starting position
+
+		LD A, h'FF			; #FF - initialization
+		CALL ISTR
+		
+		;-------------------------------------------------------
+
 		jp MAIN
 
 ;-------------------------------
@@ -119,16 +133,24 @@ MAIN    	EI
 		ld hl , M_HEAD2
 		call print_msg_c
 
-		call parse
-
-
 
 MAIN1		ld de, h'0A00		; Set Y=10 , X=0
 	  	ld (cursor_y), de
-		CALL CLAVA	;poll for key press
-        	JR Z, nvramloop	;Z - not pressed, NZ - pressed
-		Call os_plotchar
-		;call cursor_flash
+		;if ENTER pressed then exit:
+		CALL ENKE
+		jr nz, enter
+
+;editing string:
+		XOR A; 0 - inputing
+		CALL ISTR
+		JR MAIN1
+
+enter
+		push hl			; copy HL into DE
+		pop de
+		call parse
+		jr MAIN1
+
 nvramloop	
 
 		ld de, h'0800		; Set Y=8 , X=0

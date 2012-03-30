@@ -6,7 +6,7 @@
 parse
    
    	ld hl, table
-   	ld de, test_command   	;command_buffer
+   	;ld de, test_command   	;command_buffer
    
       
 parse_first
