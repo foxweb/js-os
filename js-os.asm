@@ -150,30 +150,6 @@ enter
 		pop de
 		call parse
 		jr MAIN1
-
-nvramloop	
-
-		ld de, h'0800		; Set Y=8 , X=0
-	  	ld (cursor_y), de
-		ld hl , M_TIME
-		call os_print_string
-		ld e, h'04
-		call READ_NVRAM_LOC
-		ld a, (nv_buf)
-		call BCD_DISP
-		ld a, ':'
-		call os_plotchar
-		ld e, h'02
-		call READ_NVRAM_LOC
-		ld a, (nv_buf)
-		call BCD_DISP
-		ld a, ':'
-		call os_plotchar
-		ld e, h'00
-		call READ_NVRAM_LOC
-		ld a, (nv_buf)
-		call BCD_DISP
-		jp MAIN1
 		
 
 #include "nvram.asm"

@@ -1,6 +1,6 @@
 ###############################################################################
 #                                                                             #
-#     IAR Systems Z80/64180 Assembler V4.06A/W32 30/Mar/2012  18:08:39        #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 30/Mar/2012  18:25:21        #
 #     Copyright 2001 IAR Systems. All rights reserved.                        #
 #                                                                             #
 #           Target option =  z80                                              #
@@ -195,54 +195,29 @@
     150    000158 D1                       pop de
     151    000159 CD....                   call parse
     152    00015C 18E7                     jr MAIN1
-    153    00015E          
-    154    00015E          nvramloop       
-    155    00015E          
-    156    00015E 110008                   ld de, h'0800           ; Set Y=8 ,
-                                                                    X=0
-    157    000161 ED53035B                 ld (cursor_y), de
-    158    000165 21....                   ld hl , M_TIME
-    159    000168 CD....                   call os_print_string
-    160    00016B 1E04                     ld e, h'04
-    161    00016D CD....                   call READ_NVRAM_LOC
-    162    000170 3A005D                   ld a, (nv_buf)
-    163    000173 CD....                   call BCD_DISP
-    164    000176 3E3A                     ld a, ':'
-    165    000178 CD....                   call os_plotchar
-    166    00017B 1E02                     ld e, h'02
-    167    00017D CD....                   call READ_NVRAM_LOC
-    168    000180 3A005D                   ld a, (nv_buf)
-    169    000183 CD....                   call BCD_DISP
-    170    000186 3E3A                     ld a, ':'
-    171    000188 CD....                   call os_plotchar
-    172    00018B 1E00                     ld e, h'00
-    173    00018D CD....                   call READ_NVRAM_LOC
-    174    000190 3A005D                   ld a, (nv_buf)
-    175    000193 CD....                   call BCD_DISP
-    176    000196 C3....                   jp MAIN1
-    177    000199                          
-    178    000199          
-    179    000199          #include "nvram.asm"
-    180    000227          #include "gfx-routines.asm"
-    181    000476          #include "maths-routines.asm"
-    182    000566          #include "parser.asm"
-    183    0005DF          #include "ps2_handler.asm"
-    184    000994          #include "commands/test.asm"
-    185    00099F          #include "commands/time.asm"
-    186    0009D5          #include "commands/date.asm"
-    187    000A15          #include "commands/cls.asm"
-    188    000A21          #include "booter.asm"
-    189    001128          #include "arrays.asm"
-    190    00145C          #include "restarts.asm"
-    191    000068          
-    192    000068          
-    193    000068          
-    194    000068                  end
+    153    00015E                          
+    154    00015E          
+    155    00015E          #include "nvram.asm"
+    156    0001EC          #include "gfx-routines.asm"
+    157    00043B          #include "maths-routines.asm"
+    158    00052B          #include "parser.asm"
+    159    0005A4          #include "ps2_handler.asm"
+    160    000959          #include "commands/test.asm"
+    161    000964          #include "commands/time.asm"
+    162    00099A          #include "commands/date.asm"
+    163    0009DA          #include "commands/cls.asm"
+    164    0009E6          #include "booter.asm"
+    165    0010ED          #include "arrays.asm"
+    166    001421          #include "restarts.asm"
+    167    000068          
+    168    000068          
+    169    000068          
+    170    000068                  end
 ##############################
-#          CRC:906A          #
+#          CRC:BC22          #
 #        Errors:   0         #
 #        Warnings: 0         #
-#        Bytes: 5084         #
+#        Bytes: 5025         #
 ##############################
 
 
