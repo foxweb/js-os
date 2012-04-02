@@ -6,5 +6,7 @@ make cursor flash routine - At the moment cursor is solid use variable cursorsta
 
 Make screen scroll up by one line when cursory = OS_window_rows 
 
+Fix Parser so when a command is entered with extra characters on the end it is not accepted.
+
 make fat32 nemo-ide sd routines
 
