@@ -69,8 +69,9 @@ eat_space
 parse_error
 
    	pop de
-   	ld de, h'1800
-   	ld (cursor_y), de
+	ld de, (cursor_y)
+	;inc d
+   	;ld (cursor_y), de
    	ld hl, M_SYNTAX
    	call os_print_string
    	ret

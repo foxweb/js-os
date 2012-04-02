@@ -44,7 +44,9 @@ START
 		ld (cursorstatus), a
 		ld a, 100
 		ld (cursorflashtimer), a
-		
+		ld a, h'0f
+		ld (current_pen), a
+
 		;----------------------------------------------------------------------
 		;PS2 initialization:
 
@@ -71,7 +73,7 @@ START
 		;----------------------------------------------------------------------
 
 ;MAIN CYCLE:
-MAIN    	  
+    	  
 		
 		ld a,h'0C			; Set charcol variable to default value
         	ld (current_pen),a
@@ -92,14 +94,14 @@ MAIN
 		;-------------------------------------------------------
 		;initialization for inputing string:
 
-		call get_address
-		;LD HL, h'C000		; address on screen (first line)
-		LD DE, h'8000		;curMAX + curNOW
+MAIN		call get_address
+		;LD HL, h'c000		; address on screen (first line)
+		LD DE, h'5900		;curMAX + curNOW
 
 		;curMAX - lenght of editing string
 		;curNOW - cursor starting position
 
-		LD A, h'FF			; #FF - initialization
+		LD A, h'ff			; #FF - initialization
 		CALL ISTR
 		
 		;-------------------------------------------------------
@@ -114,20 +116,21 @@ MAIN1		ei
 		jr nz, enter
 
 ;editing string:
-		ld a, h'0f
-		ld (current_pen), a
 		
 		XOR A; 0 - inputing
 		CALL ISTR
 		JR MAIN1
 
 enter
+		ld de, (cursor_y)
+		inc d
+   		ld (cursor_y), de
 		ld a, 01
 		call ISTR
 		push hl			; copy HL into DE
 		pop de
 		call parse
-		jr MAIN1
+		jr MAIN
 		
 
 ;----------------------------------------------------------------------
