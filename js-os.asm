@@ -173,6 +173,7 @@ I_N_T   	PUSH AF
 #include "commands/time.asm"
 #include "commands/date.asm"
 #include "commands/cls.asm"
+#include "commands/reboot.asm"
 #include "booter.asm"
 #include "arrays.asm"
 #include "restarts.asm"
