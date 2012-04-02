@@ -1,9 +1,10 @@
 TODO:
 
-Sort out variables 
+Sort out variables - Get everything moved as low as possible in ram as os starts at $0000
 
-make cursor flash routine
+make cursor flash routine - At the moment cursor is solid use variable cursorstatus and cursorflashtimer
 
-Make command line input routine
+Make screen scroll up by one line when cursory = OS_window_rows 
 
 make fat32 nemo-ide sd routines
+
