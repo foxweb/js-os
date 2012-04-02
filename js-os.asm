@@ -46,6 +46,8 @@ START
 		ld (cursorflashtimer), a
 		ld a, h'0f
 		ld (current_pen), a
+		ld a, 25 			; Auto repeat default value
+		ld (key_repeat), a
 
 		;----------------------------------------------------------------------
 		;PS2 initialization:
@@ -64,7 +66,7 @@ START
 		;Initialise IM2 interrupts:
 
 	    	LD HL, I_N_T
-        	LD (h'5BFF), HL	; Address for IM2 mode routine.
+        	LD (h'5BFF), HL		; Address for IM2 mode routine.
         	DI
         	LD A, h'5B
 		LD I, A
