@@ -100,6 +100,3 @@ vrompage        equ h'F4
 
 
 ; -- System variable values
-
-;OS_window_cols		equ 90
-;OS_window_rows		equ 36
