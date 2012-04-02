@@ -1,6 +1,6 @@
 ###############################################################################
 #                                                                             #
-#     IAR Systems Z80/64180 Assembler V4.06A/W32 02/Apr/2012  15:08:59        #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 02/Apr/2012  15:22:05        #
 #     Copyright 2001 IAR Systems. All rights reserved.                        #
 #                                                                             #
 #           Target option =  z80                                              #
@@ -222,24 +222,24 @@
     168    0001F7          #include "gfx-routines.asm"
     169    00042B          #include "maths-routines.asm"
     170    00051B          #include "parser.asm"
-    171    0005A1          #include "ps2_handler.asm"
-    172    000958          #include "commands/test.asm"
-    173    000963          #include "commands/time.asm"
-    174    00099F          #include "commands/date.asm"
-    175    0009E5          #include "commands/cls.asm"
-    176    0009F1          #include "commands/reboot.asm"
-    177    0009F4          #include "booter.asm"
-    178    0010FB          #include "arrays.asm"
-    179    001405          #include "restarts.asm"
+    171    0005A7          #include "ps2_handler.asm"
+    172    00095E          #include "commands/test.asm"
+    173    000969          #include "commands/time.asm"
+    174    0009A5          #include "commands/date.asm"
+    175    0009EB          #include "commands/cls.asm"
+    176    0009F7          #include "commands/reboot.asm"
+    177    0009FA          #include "booter.asm"
+    178    001101          #include "arrays.asm"
+    179    00140B          #include "restarts.asm"
     180    000068          
     181    000068          
     182    000068          
     183    000068                  end
 ##############################
-#          CRC:75F7          #
+#          CRC:8484          #
 #        Errors:   0         #
 #        Warnings: 0         #
-#        Bytes: 4997         #
+#        Bytes: 5003         #
 ##############################
 
 
