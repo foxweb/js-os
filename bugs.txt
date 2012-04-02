@@ -1,11 +1,8 @@
 Bugs to be rectified.
 
 
+Problem with Date and Time routines not returning , they just finish and freeze. All other commands work ok.
 
-parser.asm 
-
-
-Putting an extra character on the end of input string does not cause an error it executes the match.
 
 
   
