@@ -265,27 +265,27 @@ os_patch_font
 	push af			; Page in font ram at C000
 	LD      B,page3
       LD      D, txpage ^ 1
-      CALL	set_ram_pager
-	pop af
+      	CALL	set_ram_pager
+		pop af
 
-	push hl
-	ld e, h'ff			; Set Multiplicand to 255
-	ld h, a
-	call multiply8
-	ld de, h'c000		; set DE to the start of the font ram
-	call add16
-	ld d, h			; copy HL into DE
-	ld e, l
-	ld bc, 8			; load 8 into BC
-	pop hl
-	ldir				; Copy the new font ( 8 bytes ) to its location in the font ram
+		push hl
+		ld e, h'ff			; Set Multiplicand to 255
+		ld h, a
+		call multiply8
+		ld de, h'c000		; set DE to the start of the font ram
+		call add16
+		ld d, h			; copy HL into DE
+		ld e, l
+		ld bc, 8			; load 8 into BC
+		pop hl
+		ldir				; Copy the new font ( 8 bytes ) to its location in the font ram
 	
-	push af			; Restore txpage ram at C000
-	LD      B,page3
-      LD      D, txpage 	
-      CALL	set_ram_pager
-	pop af
-	ret
+		push af			; Restore txpage ram at C000
+		LD      B,page3
+      	LD      D, txpage 	
+      	CALL	set_ram_pager
+		pop af
+		ret
 
 ;---------------------------------------------------------------------------------
 
@@ -420,16 +420,16 @@ set_border
 
 LD_64_PAL
 
-        ld hl, pal_64c
-        xtr
-        xt palsel, pal_sel
-        xt fmaddr,  fm_en | (pal_addr >> 12)
-        ld de, pal_addr
-        ld bc, 128
-        ldir
-        xtr
-        xt fmaddr, 0
-        ret
+        	ld hl, pal_64c
+        	xtr
+        	xt palsel, pal_sel
+        	xt fmaddr,  fm_en | (pal_addr >> 12)
+        	ld de, pal_addr
+        	ld bc, 128
+        	ldir
+        	xtr
+        	xt fmaddr, 0
+        	ret
 
 ;---------------------------------------------------------------------------------
 
@@ -457,5 +457,26 @@ get_address
 		set 6, h
 		set 7, h			; here you have txpage + Y*256 + X
         	ret				; HL holds the address
+
+;---------------------------------------------------------------------------------
+; Convert a single character contained in A to upper case:
+;
+to_upper	cp 'a'             	; Nothing to do if not lower case
+		ret c
+		cp 'z' + 1         	; > 'z'?
+		ret nc              	; Nothing to do, either
+		and $5f             	; Convert to upper case
+		ret
+
+;---------------------------------------------------------------------------------
+; is_print checks if a character is a printable ASCII character. A valid
+; character is denoted by a set C flag.
+;
+is_print	cp ' '
+		jr nc, is_print_1
+		ccf
+		ret
+is_print_1	cp $7f
+		ret
 
 ;---------------------------------------------------------------------------------
