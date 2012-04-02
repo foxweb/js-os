@@ -433,31 +433,6 @@ LD_64_PAL
 
 ;---------------------------------------------------------------------------------
 
-; Flash the cursor at the current cursor position if cursorstatus = 1
-
-cursor_flash
-		ld a, (cursorstatus)
-		or a
-		ret z
-		ld de, (cursor_y)
-		call get_character
-		ld b, a			; Store character in B
-		dec d
-		ld a, d
-		ld (cursor_x), a
-		ld a, '_'
-		Call os_plotchar
-		call flashtimer	
-		dec d
-		ld a, d
-		ld (cursor_x), a	
-		ld a , b
-		Call os_plotchar
-		call flashtimer
-		ret
-
-;---------------------------------------------------------------------------------
-
 get_character
 
 ; Get character at the current location supllied by cursor_y
@@ -484,18 +459,3 @@ get_address
         	ret				; HL holds the address
 
 ;---------------------------------------------------------------------------------
-; Timer for cursor flash - Input from cursorflashtimer values 0 - 255 valid
-
-flashtimer
-		
-		ld a, (cursorflashtimer)
-		ld c ,a
-		ld b, h'ff
-del1		dec bc
-    		ld a, c
-    		or b
-    		jr nz, del1
-		ret
-
-;---------------------------------------------------------------------------------
-
