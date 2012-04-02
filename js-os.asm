@@ -96,7 +96,7 @@ START
 
 MAIN		call get_address
 		;LD HL, h'c000		; address on screen (first line)
-		LD DE, h'5901		;curMAX + curNOW
+		LD DE, h'5900		;curMAX + curNOW
 
 		;curMAX - lenght of editing string
 		;curNOW - cursor starting position

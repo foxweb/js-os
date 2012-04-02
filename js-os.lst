@@ -1,6 +1,6 @@
 ###############################################################################
 #                                                                             #
-#     IAR Systems Z80/64180 Assembler V4.06A/W32 02/Apr/2012  14:24:10        #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 02/Apr/2012  14:26:56        #
 #     Copyright 2001 IAR Systems. All rights reserved.                        #
 #                                                                             #
 #           Target option =  z80                                              #
@@ -134,7 +134,7 @@
      97    00011A CD....   MAIN            call get_address
      98    00011D                          ;LD HL, h'c000          ; address on
                             screen (first line)
-     99    00011D 110159                   LD DE, h'5901           ;curMAX +
+     99    00011D 110059                   LD DE, h'5900           ;curMAX +
                                                                     curNOW
     100    000120          
     101    000120                          ;curMAX - lenght of editing
@@ -229,7 +229,7 @@
     179    000068          
     180    000068                  end
 ##############################
-#          CRC:9924          #
+#          CRC:41CB          #
 #        Errors:   0         #
 #        Warnings: 0         #
 #        Bytes: 5029         #
