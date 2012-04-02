@@ -195,11 +195,21 @@ cls_text
        	ld      b,page3		
         	ld      d,txpage	;was $08
         	call	set_ram_pager
-        	ld      hl,$C000
-        	ld      de,$C001
-        	ld      bc,16383
-        	ld      (hl),0
-        	ldir
+        	ld a, %00001111	; paper(black) + ink(white)
+		ld hl, h'C000
+		ld de, h'C000+1
+		
+		ld b, 36		; 36 lines to clear
+SCREEN	push bc
+		ld (hl), ' '
+		ld bc, 128
+		ldir			; fill line (symbols)
+		
+		ld (hl), a		; A - color
+		ld bc, 128
+		ldir			; fill line (attributes)
+		pop bc
+		djnz SCREEN
 		ret
 
 ;---------------------------------------------------------------------------------
@@ -462,6 +472,17 @@ get_character
 
 ;---------------------------------------------------------------------------------
 
+get_address
+
+; Get screen address at the current location supllied by cursor_y
+; Output HL holds the address
+
+		ld hl, (cursor_y)		; h = x, l = y
+		set 6, h
+		set 7, h			; here you have txpage + Y*256 + X
+        	ret				; HL holds the address
+
+;---------------------------------------------------------------------------------
 ; Timer for cursor flash - Input from cursorflashtimer values 0 - 255 valid
 
 flashtimer

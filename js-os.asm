@@ -44,26 +44,57 @@ START
 		ld (cursorstatus), a
 		ld a, 100
 		ld (cursorflashtimer), a
-		ld de, h'0500			; Y = 5 , X = 0 setup powerup cursor position
-		ld (cursor_y), de
-
-
 		
- CALL INIT	; Initialise PS2 keyboard interface.
+		;----------------------------------------------------------------------
+		;PS2 initialization:
 
-;Initialise IM2 interrupts:
-INTA    	LD HL, I_N_T
+	    	LD BC,h'EFF7
+        	LD A,h'80
+        	OUT (C),A
+        	LD BC,h'DFF7
+        	LD A,h'F0
+        	OUT (C),A
+        	LD BC,h'BFF7
+        	LD A,h'02
+        	OUT (C),A
+
+		;----------------------------------------------------------------------
+		;Initialise IM2 interrupts:
+
+	    	LD HL, I_N_T
         	LD (h'5BFF), HL	; Address for IM2 mode routine.
         	DI
         	LD A, h'5B
 		LD I, A
         	IM 2
 
+		;----------------------------------------------------------------------
+
+;MAIN CYCLE:
+MAIN    	  
+		
+		ld a,h'0C			; Set charcol variable to default value
+        	ld (current_pen),a
+		ld de, h'0000		; Set Y=0 , X=0
+	  	ld (cursor_y), de
+		ld hl , M_HEAD1
+		call print_msg_c
+		ld a, h'0f
+		ld (current_pen), a
+		ld de, h'0100		; Set Y=1 , X=0
+	  	ld (cursor_y), de
+		ld hl , M_HEAD2
+		call print_msg_c
+		
+		ld de, h'0500			; Y = 5 , X = 0 setup powerup cursor position
+		ld (cursor_y), de
+		
 		;-------------------------------------------------------
 		;initialization for inputing string:
 
-		LD HL, h'C000		; address on screen (first line)
-		LD DE, h'0800		;curMAX + curNOW
+		call get_address
+		;LD HL, h'C000		; address on screen (first line)
+		LD DE, h'8000		;curMAX + curNOW
 
 		;curMAX - lenght of editing string
 		;curNOW - cursor starting position
@@ -73,21 +104,33 @@ INTA    	LD HL, I_N_T
 		
 		;-------------------------------------------------------
 
-		jp MAIN
+		
 
-;-------------------------------
-;PS2 initialization:
-INIT    	LD BC,h'EFF7
-        	LD A,h'80
-        	OUT (C),A
-        	LD BC,h'DFF7
-        	LD A,h'F0
-        	OUT (C),A
-        	LD BC,h'BFF7
-        	LD A,h'02
-        	OUT (C),A
-        	RET
-;-------------------------------
+		
+MAIN1		ei
+		halt
+		;if ENTER pressed then exit:
+		CALL ENKE
+		jr nz, enter
+
+;editing string:
+		ld a, h'0f
+		ld (current_pen), a
+		
+		XOR A; 0 - inputing
+		CALL ISTR
+		JR MAIN1
+
+enter
+		ld a, 01
+		call ISTR
+		push hl			; copy HL into DE
+		pop de
+		call parse
+		jr MAIN1
+		
+
+;----------------------------------------------------------------------
 ; IM2 Interrupt handler:
 I_N_T   	PUSH AF
         	PUSH BC
@@ -116,41 +159,8 @@ I_N_T   	PUSH AF
         	POP AF
         	EI
         	RET
-		
-;MAIN CYCLE:
-MAIN    	EI   
-		
-		ld a,h'0C			; Set charcol variable to default value
-        	ld (current_pen),a
-		ld de, h'0000		; Set Y=0 , X=0
-	  	ld (cursor_y), de
-		ld hl , M_HEAD1
-		call print_msg_c
-		ld a, h'0f
-		ld (current_pen), a
-		ld de, h'0100		; Set Y=1 , X=0
-	  	ld (cursor_y), de
-		ld hl , M_HEAD2
-		call print_msg_c
 
-
-MAIN1		ld de, h'0A00		; Set Y=10 , X=0
-	  	ld (cursor_y), de
-		;if ENTER pressed then exit:
-		CALL ENKE
-		jr nz, enter
-
-;editing string:
-		XOR A; 0 - inputing
-		CALL ISTR
-		JR MAIN1
-
-enter
-		push hl			; copy HL into DE
-		pop de
-		call parse
-		jr MAIN1
-		
+;----------------------------------------------------------------------
 
 #include "nvram.asm"
 #include "gfx-routines.asm"
