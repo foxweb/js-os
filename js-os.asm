@@ -61,6 +61,8 @@ START
         	LD BC,h'BFF7
         	LD A,h'02
         	OUT (C),A
+		
+		CALL AGU; reset win keyz and clear KB buffer
 
 		;----------------------------------------------------------------------
 		;Initialise IM2 interrupts:
