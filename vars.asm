@@ -14,7 +14,7 @@ cursorflashtimer	defs 1		; Cursor flash timer
 cursorstatus	defs 1		; Cursor status
 rnd_seed		defs 1		; Random number seed
 rnd_num		defs 1		; Random number
-command_buffer	defs 64		; Command line buffer
+key_repeat		defs 1		; Key repeat
 
 ; -------- FAT driver
 

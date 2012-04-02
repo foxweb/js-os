@@ -1,4 +1,5 @@
-RPT     EQU 25;AUTO REPEAT
+;RPT     EQU 25;AUTO REPEAT
+
 ;-------
 BCA     EQU TAB+1
 BCS     EQU TAB+2
@@ -266,7 +267,7 @@ ARC     LD A, (HL)
         CP h'FF
         JR NZ, A2C
 
-        LD A, RPT
+        LD A, (key_repeat)			; Was RPT
         LD (ARR), A
 AC      LD A, 1
         OR A
@@ -287,7 +288,7 @@ ANYK    LD HL, TAB
         INC HL
         DJNZ $-4
         RET
-NYK     LD A, RPT
+NYK     LD A, (key_repeat)			; Was RPT
         LD (ARR), A
         RET
 ;---------------------------------------
