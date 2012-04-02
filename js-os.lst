@@ -1,6 +1,6 @@
 ###############################################################################
 #                                                                             #
-#     IAR Systems Z80/64180 Assembler V4.06A/W32 02/Apr/2012  14:47:40        #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 02/Apr/2012  14:53:07        #
 #     Copyright 2001 IAR Systems. All rights reserved.                        #
 #                                                                             #
 #           Target option =  z80                                              #
@@ -214,25 +214,25 @@
     164    000164          
     165    000164          #include "nvram.asm"
     166    0001F2          #include "gfx-routines.asm"
-    167    000459          #include "maths-routines.asm"
-    168    000549          #include "parser.asm"
-    169    0005C6          #include "ps2_handler.asm"
-    170    00097B          #include "commands/test.asm"
-    171    000986          #include "commands/time.asm"
-    172    0009C2          #include "commands/date.asm"
-    173    000A08          #include "commands/cls.asm"
-    174    000A14          #include "booter.asm"
-    175    00111B          #include "arrays.asm"
-    176    001425          #include "restarts.asm"
+    167    000426          #include "maths-routines.asm"
+    168    000516          #include "parser.asm"
+    169    000593          #include "ps2_handler.asm"
+    170    000948          #include "commands/test.asm"
+    171    000953          #include "commands/time.asm"
+    172    00098F          #include "commands/date.asm"
+    173    0009D5          #include "commands/cls.asm"
+    174    0009E1          #include "booter.asm"
+    175    0010E8          #include "arrays.asm"
+    176    0013F2          #include "restarts.asm"
     177    000068          
     178    000068          
     179    000068          
     180    000068                  end
 ##############################
-#          CRC:DFFA          #
+#          CRC:89D4          #
 #        Errors:   0         #
 #        Warnings: 0         #
-#        Bytes: 5029         #
+#        Bytes: 4978         #
 ##############################
 
 
