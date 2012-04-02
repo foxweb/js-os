@@ -15,10 +15,17 @@ parse_first
    	push de         		; Store address of the first character on the stack      
    	cp (hl)         		; Compare the first character with the first character in the table
    	jr z, parse_compare    	; Jump to parse_compare if equal
+   	cp 15				; No command entered ?
+	jp z, no_command
    	ld a, '@'
    	cp (hl)
    	jr z, parse_error      	; Is it the end of the command table ? Unkown command error.
    	jr parse_next
+
+no_command
+
+	pop de
+	ret
 
 parse_compare
    
@@ -33,7 +40,7 @@ parse_compare
    	ld a, '@'
    	cp (hl)
    	jr z, parse_error      	; Is it the end of the command table ? Unkown command error.
-
+	
 parse_next
 
    	inc hl         		; Increment HL to find the zero terminator

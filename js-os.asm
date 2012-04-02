@@ -111,13 +111,13 @@ MAIN		call get_address
 		
 MAIN1		ei
 		halt
-		;if ENTER pressed then exit:
+		;if ENTER pressed then parse:
 		CALL ENKE
 		jr nz, enter
 
 ;editing string:
 		
-		XOR A; 0 - inputing
+		XOR A				; 0 - inputing
 		CALL ISTR
 		JR MAIN1
 
@@ -125,7 +125,7 @@ enter
 		ld de, (cursor_y)
 		inc d
    		ld (cursor_y), de
-		ld a, 01
+		ld a, 01			; Terminate editing string in HL
 		call ISTR
 		push hl			; copy HL into DE
 		pop de
