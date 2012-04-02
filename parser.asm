@@ -42,7 +42,7 @@ parse_compare
    	jr z, parse_error      	; Is it the end of the command table ? Unkown command error.
 	
 parse_next
-
+	
    	inc hl         		; Increment HL to find the zero terminator
    	ld a, 0         		; Is it the end of command 0 terminator
    	cp (hl)
@@ -55,6 +55,9 @@ parse_next
 
 parse_match
 
+	ld a, (de)         	; Does the command match the one in the buffer
+	cp ' '
+	jp nz, parse_next
    	inc hl         		; Increment HL to point to LSB of jump vector
    	ld c, (hl)         	; Load LSB with vector
    	inc hl         		; Increment HL to point to MSB of jump vector
