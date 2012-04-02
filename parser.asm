@@ -107,6 +107,10 @@ table
       defb 0         		; 1 byte - Zero byte to mark end of command
       defw dates         	; 2 bytes
 
+	defb 'reboot'      		; Command
+      defb 0         		; 1 byte - Zero byte to mark end of command
+      defw reboot         	; 2 bytes
+
    	defb '@'         		; Signifies table end reached
 
  
