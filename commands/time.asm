@@ -24,6 +24,8 @@ time
 		call READ_NVRAM_LOC
 		ld a, (nv_buf)
 		call BCD_DISP
+		ld hl, M_NEWLINE
+		call os_print_string
 		ret
 
 ;---------------------------------------------------------------------------------

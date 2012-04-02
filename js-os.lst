@@ -1,6 +1,6 @@
 ###############################################################################
 #                                                                             #
-#     IAR Systems Z80/64180 Assembler V4.06A/W32 02/Apr/2012  13:08:16        #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 02/Apr/2012  14:24:10        #
 #     Copyright 2001 IAR Systems. All rights reserved.                        #
 #                                                                             #
 #           Target option =  z80                                              #
@@ -134,7 +134,7 @@
      97    00011A CD....   MAIN            call get_address
      98    00011D                          ;LD HL, h'c000          ; address on
                             screen (first line)
-     99    00011D 110059                   LD DE, h'5900           ;curMAX +
+     99    00011D 110159                   LD DE, h'5901           ;curMAX +
                                                                     curNOW
     100    000120          
     101    000120                          ;curMAX - lenght of editing
@@ -147,95 +147,92 @@
     106    000125                          
     107    000125                          ;-----------------------------------
                            --------------------
-    108    000125          
-    109    000125                          
-    110    000125          
-    111    000125                          
-    112    000125 FB       MAIN1           ei
-    113    000126 76                       halt
-    114    000127                          ;if ENTER pressed then parse:
-    115    000127 CD....                   CALL ENKE
-    116    00012A 2006                     jr nz, enter
-    117    00012C          
-    118    00012C          ;editing string:
-    119    00012C                          
-    120    00012C AF                       XOR A                           ; 0
+    108    000125                          
+    109    000125 FB       MAIN1           ei
+    110    000126 76                       halt
+    111    000127                          ;if ENTER pressed then parse:
+    112    000127 CD....                   CALL ENKE
+    113    00012A 2006                     jr nz, enter
+    114    00012C          
+    115    00012C          ;editing string:
+    116    00012C                          
+    117    00012C AF                       XOR A                           ; 0
   - inputing
-    121    00012D CD....                   CALL ISTR
-    122    000130 18F3                     JR MAIN1
-    123    000132          
-    124    000132          enter
-    125    000132 ED5B035B                 ld de, (cursor_y)
-    126    000136 14                       inc d
-    127    000137 ED53035B                 ld (cursor_y), de
-    128    00013B 3E01                     ld a, 01                        ;
+    118    00012D CD....                   CALL ISTR
+    119    000130 18F3                     JR MAIN1
+    120    000132          
+    121    000132          enter
+    122    000132 ED5B035B                 ld de, (cursor_y)
+    123    000136 14                       inc d
+    124    000137 ED53035B                 ld (cursor_y), de
+    125    00013B 3E01                     ld a, 01                        ;
                                                   Terminate editing string in
                                                   HL
-    129    00013D CD....                   call ISTR
-    130    000140 E5                       push hl                 ; copy HL
+    126    00013D CD....                   call ISTR
+    127    000140 E5                       push hl                 ; copy HL
                                                                     into
                                                                     DE
-    131    000141 D1                       pop de
-    132    000142 CD....                   call parse
-    133    000145 18D3                     jr MAIN
-    134    000147                          
-    135    000147          
-    136    000147          ;---------------------------------------------------
+    128    000141 D1                       pop de
+    129    000142 CD....                   call parse
+    130    000145 18D3                     jr MAIN
+    131    000147                          
+    132    000147          
+    133    000147          ;---------------------------------------------------
                            -------------------
-    137    000147          ; IM2 Interrupt handler:
-    138    000147 F5       I_N_T           PUSH AF
-    139    000148 C5                       PUSH BC
-    140    000149 D5                       PUSH DE
-    141    00014A E5                       PUSH HL
-    142    00014B DDE5                     PUSH IX
-    143    00014D D9                       EXX
-    144    00014E 08                       EX AF, AF
-    145    00014F F5                       PUSH AF
-    146    000150 C5                       PUSH BC
-    147    000151 D5                       PUSH DE
-    148    000152 E5                       PUSH HL
-    149    000153          
-    150    000153 CD....                   CALL PSDII      ; Get value from PS2
+    134    000147          ; IM2 Interrupt handler:
+    135    000147 F5       I_N_T           PUSH AF
+    136    000148 C5                       PUSH BC
+    137    000149 D5                       PUSH DE
+    138    00014A E5                       PUSH HL
+    139    00014B DDE5                     PUSH IX
+    140    00014D D9                       EXX
+    141    00014E 08                       EX AF, AF
+    142    00014F F5                       PUSH AF
+    143    000150 C5                       PUSH BC
+    144    000151 D5                       PUSH DE
+    145    000152 E5                       PUSH HL
+    146    000153          
+    147    000153 CD....                   CALL PSDII      ; Get value from PS2
                                                             keyboard buffer.
-    151    000156          
-    152    000156 E1                       POP HL
-    153    000157 D1                       POP DE
-    154    000158 C1                       POP BC
-    155    000159 F1                       POP AF
-    156    00015A D9                       EXX
-    157    00015B 08                       EX AF, AF
-    158    00015C DDE1                     POP IX
-    159    00015E E1                       POP HL
-    160    00015F D1                       POP DE
-    161    000160 C1                       POP BC
-    162    000161 F1                       POP AF
-    163    000162 FB                       EI
-    164    000163 C9                       RET
-    165    000164          
-    166    000164          ;---------------------------------------------------
+    148    000156          
+    149    000156 E1                       POP HL
+    150    000157 D1                       POP DE
+    151    000158 C1                       POP BC
+    152    000159 F1                       POP AF
+    153    00015A D9                       EXX
+    154    00015B 08                       EX AF, AF
+    155    00015C DDE1                     POP IX
+    156    00015E E1                       POP HL
+    157    00015F D1                       POP DE
+    158    000160 C1                       POP BC
+    159    000161 F1                       POP AF
+    160    000162 FB                       EI
+    161    000163 C9                       RET
+    162    000164          
+    163    000164          ;---------------------------------------------------
                            -------------------
-    167    000164          
-    168    000164          #include "nvram.asm"
-    169    0001F2          #include "gfx-routines.asm"
-    170    000459          #include "maths-routines.asm"
-    171    000549          #include "parser.asm"
-    172    0005C6          #include "ps2_handler.asm"
-    173    00097B          #include "commands/test.asm"
-    174    000986          #include "commands/time.asm"
-    175    0009BC          #include "commands/date.asm"
-    176    0009FC          #include "commands/cls.asm"
-    177    000A08          #include "booter.asm"
-    178    00110F          #include "arrays.asm"
-    179    001443          #include "restarts.asm"
-    180    000068          
-    181    000068          
-    182    000068          
-    183    000068                  end
+    164    000164          
+    165    000164          #include "nvram.asm"
+    166    0001F2          #include "gfx-routines.asm"
+    167    000459          #include "maths-routines.asm"
+    168    000549          #include "parser.asm"
+    169    0005C6          #include "ps2_handler.asm"
+    170    00097B          #include "commands/test.asm"
+    171    000986          #include "commands/time.asm"
+    172    0009C2          #include "commands/date.asm"
+    173    000A08          #include "commands/cls.asm"
+    174    000A14          #include "booter.asm"
+    175    00111B          #include "arrays.asm"
+    176    001425          #include "restarts.asm"
+    177    000068          
+    178    000068          
+    179    000068          
+    180    000068                  end
 ##############################
-#          CRC:6D8A          #
+#          CRC:9924          #
 #        Errors:   0         #
 #        Warnings: 0         #
-#        Bytes: 5059         #
+#        Bytes: 5029         #
 ##############################
 
 

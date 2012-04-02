@@ -4,7 +4,6 @@
 
 
 dates
-	  	
 		ld de, (cursor_y)
 		ld hl, M_DATE
 		call os_print_string
@@ -28,6 +27,8 @@ dates
 		call READ_NVRAM_LOC
 		ld a, (nv_buf)
 		call BCD_DISP
+		ld hl, M_NEWLINE
+		call os_print_string
 		ret
 
 ;---------------------------------------------------------------------------------

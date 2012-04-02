@@ -47,6 +47,7 @@ RNV1
 
 READ_NVRAM_LOC
 ; Input E = Nvram location
+
         	outf7 shadow, shadow_on
 
         	ld hl, nv_buf

@@ -2,7 +2,7 @@
 #                                                                              #
 #      IAR Universal Linker V5.0.0.2/W32                                       #
 #                                                                              #
-#           Link time     =  02/Apr/2012  13:08:16                             #
+#           Link time     =  02/Apr/2012  14:24:10                             #
 #           Target CPU    =  Z80/64180                                         #
 #           List file     =  js-os.map                                         #
 #           Output file 1 =  "C:\Documents and Settings\Attain PD\My Documents #
@@ -58,7 +58,7 @@ FONT8
   SEGMENTS IN THE MODULE
   ======================
 CODE
-  Relative segment, address: 0000 - 1442 (0x1443 bytes), align: 0
+  Relative segment, address: 0000 - 1424 (0x1425 bytes), align: 0
   Segment part 0. ROOT.
 
     *************************************************************************
@@ -69,7 +69,7 @@ CODE
   SEGMENTS IN THE MODULE
   ======================
 ?FILL1
-  Relative segment, address: 1443 - 37FF (0x23bd bytes), align: 0
+  Relative segment, address: 1425 - 37FF (0x23db bytes), align: 0
   Segment part 0.
 
 
@@ -85,8 +85,8 @@ Module           CODE  CONST
 ------           ----  -----
                 (Rel)  (Rel)
  Image file 0          2 048
-?FILLER_BYTES   9 149
-js-os           5 187
+?FILLER_BYTES   9 179
+js-os           5 157
 ------         ------  -----
 Total:         14 336  2 048
 
@@ -100,8 +100,8 @@ Total:         14 336  2 048
 
 SEGMENT              SPACE    START ADDRESS   END ADDRESS     SIZE  TYPE  ALIGN
 =======              =====    =============   ===========     ====  ====  =====
-CODE                                   0000 - 1442            1443   rel    0
-?FILL1                                 1443 - 37FF            23BD   rel    0
+CODE                                   0000 - 1424            1425   rel    0
+?FILL1                                 1425 - 37FF            23DB   rel    0
 FONT8                                  3800 - 3FFF             800   rel    0
 
                 ****************************************
@@ -110,7 +110,7 @@ FONT8                                  3800 - 3FFF             800   rel    0
                 *                                      *
                 ****************************************
 
- 5 187 bytes of CODE  memory (+ 9 149 range fill )
+ 5 157 bytes of CODE  memory (+ 9 179 range fill )
  2 048 bytes of CONST memory
 
 Errors: none

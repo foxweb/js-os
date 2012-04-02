@@ -24,7 +24,7 @@ M_HEAD2
         dec8 date 1      ; second (0-59)
         defb 0
 
-M_HLP   defb 'If this is showing then so far so good.....', 0
+M_NEWLINE   defb h'0d, 0
 
 M_TIME  defb 'Time : ', 0
 
