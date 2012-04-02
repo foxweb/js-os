@@ -97,6 +97,3 @@ pal_sel         equ h'F
 
 ; -- pages config
 vrompage        equ h'F4
-
-
-; -- System variable values
