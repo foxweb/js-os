@@ -110,9 +110,9 @@ scroll_up
 		push bc
 		push de
 		push hl
-		ld hl, #c100
-		ld de, #c000
-		ld bc, #2300
+		ld hl, h'c100
+		ld de, h'c000
+		ld bc, h'2300
 		ldir
 		dec h
 		inc e
