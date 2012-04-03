@@ -33,7 +33,7 @@ nocr		cp 10				; is character a LF? (10)
 	
 nolf		call os_plotchar
 		inc c				; move right a character - Was inc b
-		ld a,c			; Was ld a,b
+		ld a,c				; Was ld a,b
 		ld ix, OS_window_cols
 		ld d, (ix+0)
 		cp d				; right edge of screen?
@@ -50,7 +50,7 @@ linefeed	inc b
 		call scroll_up
 		pop bc
 		pop hl
-		ld a, (ix+0)		;ld c,OS_window_rows-1
+		ld a, (ix+0)			;ld c,OS_window_rows-1
 		sub c	
 		ld c, a	
 		jr prtstrlp
@@ -73,7 +73,7 @@ os_plotchar
 		set 6, h
 		set 7, h			; here you have txpage + Y*256 + X
 		ld (hl), a
-		ld b, h			; Preserve h register
+		ld b, h				; Preserve h register
 		set 7, l
 		ld a,(char_colour)
         	ld (hl), a			; Set color
@@ -106,6 +106,7 @@ xytest		ld h, b
 scroll_up
 
 ; Scroll text screen up by 1 and blank bottom line
+; Scrolls 35 lines up and fills 36th with all 0 (chars and attrs).
 
 		push bc
 		push de
@@ -182,7 +183,7 @@ load_font
 ; Loads 2048 byte font into $C000 ram ( txpage ^ 1 ) page 9 ??
 
  		ld      b,page3
-        	ld      d, txpage ^ 1 ; h'09 ???
+        	ld      d, txpage ^ 1 	; h'09 ???
         	call	set_ram_pager
         	ld      hl,font8
         	ld      de,$C000
@@ -199,7 +200,7 @@ cls_text
 		ld      b,page3		
         	ld      d,txpage	;was $08
         	call	set_ram_pager
-        	ld a, %00001111	; paper(black) + ink(white)
+        	ld a, %00001111		; paper(black) + ink(white)
 		ld hl, h'C000
 		ld de, h'C000+1
 		
@@ -223,7 +224,7 @@ set_ram_pager
 ; Entry B=Port base 10-$0000 11-$4000 12-$8000 13-$C000, D=Page
 
 		LD C,extp		
-		out (c),D	; This could be $00-$ff
+		out (c),D		; This could be $00-$ff
 		ret
 
 ;---------------------------------------------------------------------------------
@@ -265,7 +266,7 @@ os_patch_font
 ; HL to source char address
 
 
-		push af			; Page in font ram at C000
+		push af				; Page in font ram at C000
 		ld b, page3
 		ld d, txpage ^ 1
 		call set_ram_pager
@@ -275,15 +276,15 @@ os_patch_font
 		ld e, h'ff			; Set Multiplicand to 255
 		ld h, a
 		call multiply8
-		ld de, h'c000		; set DE to the start of the font ram
+		ld de, h'c000			; set DE to the start of the font ram
 		call add16
-		ld d, h			; copy HL into DE
+		ld d, h				; copy HL into DE
 		ld e, l
 		ld bc, 8			; load 8 into BC
 		pop hl
 		ldir				; Copy the new font ( 8 bytes ) to its location in the font ram
 	
-		push af			; Restore txpage ram at C000
+		push af				; Restore txpage ram at C000
 		ld b, page3
 		ld d, txpage 	
 		call set_ram_pager
@@ -413,7 +414,7 @@ set_border
 ; Input var border_colour
 
 		ld a, (border_colour)
-		ld bc, h'0faf		; Border port
+		ld bc, h'0faf			; Border port
 		out (c), a
 		ret
 
@@ -464,11 +465,11 @@ get_address
 ;---------------------------------------------------------------------------------
 ; Convert a single character contained in A to upper case:
 ;
-to_upper	cp 'a'             	; Nothing to do if not lower case
+to_upper	cp 'a'             		; Nothing to do if not lower case
 		ret c
-		cp 'z' + 1         	; > 'z'?
-		ret nc              	; Nothing to do, either
-		and $5f             	; Convert to upper case
+		cp 'z' + 1         		; > 'z'?
+		ret nc              		; Nothing to do, either
+		and $5f             		; Convert to upper case
 		ret
 
 ;---------------------------------------------------------------------------------
