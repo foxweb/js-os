@@ -250,6 +250,23 @@ BCD_DISP
 	RET
 
 ;---------------------------------------------------------------------------------
+;Input: L = binary number < 100
+;Output A = BCD number
+
+BinaryToBCD
+
+	ld h, l
+	ld de, H'F606
+
+BinaryToBCDLoop
+
+	add hl, de
+	jr c, BinaryToBCDLoop
+	ld a, l
+	sub e
+	ret
+
+;---------------------------------------------------------------------------------
 
 rnd8
 
