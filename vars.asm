@@ -15,6 +15,7 @@ cursorstatus	defs 1		; Cursor status
 rnd_seed		defs 1		; Random number seed
 rnd_num		defs 1		; Random number
 key_repeat		defs 1		; Key repeat
+com_start_addr	defs 1		; Temp store start address of executable
 
 ; -------- FAT driver
 

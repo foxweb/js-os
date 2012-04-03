@@ -1,6 +1,6 @@
 ###############################################################################
 #                                                                             #
-#     IAR Systems Z80/64180 Assembler V4.06A/W32 02/Apr/2012  20:23:52        #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 03/Apr/2012  23:00:38        #
 #     Copyright 2001 IAR Systems. All rights reserved.                        #
 #                                                                             #
 #           Target option =  z80                                              #
@@ -223,26 +223,26 @@
     168    00016C          
     169    00016C          #include "nvram.asm"
     170    0001FA          #include "gfx-routines.asm"
-    171    000440          #include "maths-routines.asm"
-    172    000530          #include "parser.asm"
-    173    0005BC          #include "ps2_handler.asm"
-    174    000973          #include "commands/test.asm"
-    175    00097E          #include "commands/time.asm"
-    176    0009BA          #include "commands/date.asm"
-    177    000A00          #include "commands/cls.asm"
-    178    000A0C          #include "commands/reboot.asm"
-    179    000A0F          #include "booter.asm"
-    180    001116          #include "arrays.asm"
-    181    00141C          #include "restarts.asm"
+    171    000441          #include "maths-routines.asm"
+    172    00053B          #include "parser.asm"
+    173    0005D0          #include "ps2_handler.asm"
+    174    000987          #include "commands/test.asm"
+    175    000992          #include "commands/time.asm"
+    176    0009CE          #include "commands/date.asm"
+    177    000A14          #include "commands/cls.asm"
+    178    000A20          #include "commands/reboot.asm"
+    179    000A23          #include "booter.asm"
+    180    00112A          #include "arrays.asm"
+    181    001430          #include "restarts.asm"
     182    000068          
     183    000068          
     184    000068          
     185    000068                  end
 ##############################
-#          CRC:6EAF          #
+#          CRC:2B0           #
 #        Errors:   0         #
 #        Warnings: 0         #
-#        Bytes: 5020         #
+#        Bytes: 5040         #
 ##############################
 
 
