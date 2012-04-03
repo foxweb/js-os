@@ -107,18 +107,21 @@ scroll_up
 
 ; Scroll text screen up by 1 and blank bottom line
 
-		LD DE,$C000			; Destination - Copy lines 1 to 89 to 0 to 88
-		LD HL,$C100			; Source
-		LD BC,$3EFF			; total to bytes copy
+		push bc
+		push de
+		push hl
+		ld hl, #c100
+		ld de, #c000
+		ld bc, #2300
 		ldir
-		; Then clear bottom line 89
-		ld hl,$E400			; HL = start address of block
-		ld e,l			; DE = HL + 1
-		ld d,h
-		inc de
-		ld (hl), ' '			; initialise first byte of block with data byte ' '
-		ld bc,$59			; BC = length of block in bytes HL+BC-1 = end address of block
-		ldir				; fill memory
+		dec h
+		inc e
+		dec c
+		ld (hl), b
+		ldir
+		pop hl
+		pop de
+		pop bc
 		ret
 
 ;---------------------------------------------------------------------------------
