@@ -106,7 +106,7 @@ xytest		ld h, b
 scroll_up
 
 ; Scroll text screen up by 1 and blank bottom line
-; Scrolls 35 lines up and fills 36th with all 0 (chars and attrs).
+; Scrolls 35 lines up and fills 36th with spaces and atrribs with %00001111	; paper(black) + ink(white).
 
 		push bc
 		push de
@@ -117,8 +117,8 @@ scroll_up
 		ldir
 		dec h
 		inc e
-		dec c
-		ld (hl), b
+		ld c, 127
+		ld (hl), 32
 		ldir
 		pop hl
 		pop de
