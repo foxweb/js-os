@@ -62,12 +62,18 @@ parse_match
    	ld c, (hl)         	; Load LSB with vector
    	inc hl         		; Increment HL to point to MSB of jump vector
    	ld b, (hl)         	; Load MSB with vector
-   	push bc         		; Push BC onto the stack
-   	pop hl         		; Load HL with BC
+   	push bc         	; Push BC onto the stack
+	pop ix			; IX = addr of command subroutine code
 	pop de
-     	jp (hl)         		; Jump to command code
+	call os_exec_command	; call internal command
    	ret
-   
+
+os_exec_command
+
+	ld (com_start_addr),ix	;temp store start address of executable
+	jp (ix)			;jump to command code
+
+
 eat_space
 
       ld a, (de)
