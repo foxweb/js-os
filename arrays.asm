@@ -1,7 +1,5 @@
-test_command
-		defb 'time'
-
-; ------- messages
+; ---------------------------------------------------------- 
+; messages
 
 M_HEAD1
         defb 'JS Operating System ',$FC
@@ -35,7 +33,8 @@ M_SYNTAX	defb 'Syntax error - Invalid command', h'0d, 0
 M_test	defb 'This command works......', h'0d, 0
 
 
-; -- palette
+; ---------------------------------------------------------- 
+; palette
 
 pal_64c
         defw h'0000
@@ -102,7 +101,8 @@ pal_64c
         defw h'6308
         defw h'6310
         defw h'6318
-        
+  
+; -------------------------------------------------------------------------------------------     
 
 sysvar_start
         defb h'FF,h'00,h'23,h'0D,h'44,h'05,h'0B,h'44,h'00,h'10,h'01,h'00,h'00,h'00,h'16,h'07

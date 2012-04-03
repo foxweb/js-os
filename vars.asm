@@ -67,6 +67,7 @@ zes             defs 1
 
 
 ; -- NVRAM cells
+
                 org nv_buf + nv_1st
 
 fddv            defs 1      ; FDDVirt (#29AF copy)  // non-removable #B0
@@ -90,6 +91,7 @@ nv_size         equ $ - nv_buf - nv_1st
 
 
 ; FAT driver buffers
+
                 org fat_bufs
 
 secbu           defs 512

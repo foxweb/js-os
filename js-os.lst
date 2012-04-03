@@ -1,6 +1,6 @@
 ###############################################################################
 #                                                                             #
-#     IAR Systems Z80/64180 Assembler V4.06A/W32 02/Apr/2012  20:17:33        #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 02/Apr/2012  20:23:52        #
 #     Copyright 2001 IAR Systems. All rights reserved.                        #
 #                                                                             #
 #           Target option =  z80                                              #
@@ -233,16 +233,16 @@
     178    000A0C          #include "commands/reboot.asm"
     179    000A0F          #include "booter.asm"
     180    001116          #include "arrays.asm"
-    181    001420          #include "restarts.asm"
+    181    00141C          #include "restarts.asm"
     182    000068          
     183    000068          
     184    000068          
     185    000068                  end
 ##############################
-#          CRC:2039          #
+#          CRC:6EAF          #
 #        Errors:   0         #
 #        Warnings: 0         #
-#        Bytes: 5024         #
+#        Bytes: 5020         #
 ##############################
 
 
