@@ -19,7 +19,7 @@ prtstrlp	ld a,(hl)
 		pop bc
 		ret
 	
-noteos	cp 13				; is character a CR? (13)
+noteos		cp 13				; is character a CR? (13)
 		jr nz,nocr
 		ld c,0
 		inc b
@@ -95,7 +95,7 @@ os_plotchar
 		pop hl
 		ret
 
-xytest	ld h, b
+xytest		ld h, b
 		ld l, a
 		ld (cursor_y), hl		; Save cursor values
 		pop hl
@@ -196,7 +196,7 @@ cls_text
 
 ; Clear text screen at $C000 ram page 8
 
-       	ld      b,page3		
+		ld      b,page3		
         	ld      d,txpage	;was $08
         	call	set_ram_pager
         	ld a, %00001111	; paper(black) + ink(white)
@@ -204,7 +204,7 @@ cls_text
 		ld de, h'C000+1
 		
 		ld b, 36		; 36 lines to clear
-SCREEN	push bc
+SCREEN		push bc
 		ld (hl), ' '
 		ld bc, 128
 		ldir			; fill line (symbols)
@@ -265,10 +265,10 @@ os_patch_font
 ; HL to source char address
 
 
-	push af			; Page in font ram at C000
-	LD      B,page3
-      LD      D, txpage ^ 1
-      	CALL	set_ram_pager
+		push af			; Page in font ram at C000
+		ld b, page3
+		ld d, txpage ^ 1
+		call set_ram_pager
 		pop af
 
 		push hl
@@ -284,9 +284,9 @@ os_patch_font
 		ldir				; Copy the new font ( 8 bytes ) to its location in the font ram
 	
 		push af			; Restore txpage ram at C000
-		LD      B,page3
-      	LD      D, txpage 	
-      	CALL	set_ram_pager
+		ld b, page3
+		ld d, txpage 	
+		call set_ram_pager
 		pop af
 		ret
 
