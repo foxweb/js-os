@@ -17,10 +17,6 @@ START
 		ld d, h'5
 		call set_ram_pager
         	ld sp, stck
-	  	ld a,h'0C			; Set charcol variable to default value
-        	ld (current_pen),a
-	  	LD DE,h'0000		; Set XYPOS D - Y , E - X to the default of 0,0
-	  	LD (cursor_y),DE
         	call load_font
 	  	xor a
         	out (254), a
@@ -33,22 +29,29 @@ START
 		ld b,h'13
 		ld d, txpage
    		call set_ram_pager
-	  	call cls_text
-		ld a, h'0
-		ld (border_colour), a
-		call set_border
+	  	
 		
  ; Setup system variables
+		
 
+		ld a, h'0F			; Set charcol variable to default value
+        	ld (current_pen), a
+		ld a, h'0
+		ld (border_colour), a
+	  	ld de,h'0000		; Set XYPOS D - Y , E - X to the default of 0,0
+	  	ld (cursor_y), de
 		ld a, 1
 		ld (cursorstatus), a
 		ld a, 100
 		ld (cursorflashtimer), a
-		ld a, h'0f
-		ld (current_pen), a
 		ld a, 25 			; Auto repeat default value
 		ld (key_repeat), a
-
+		
+		;----------------------------------------------------------------------
+		
+		call cls_text
+		call set_border
+		
 		;----------------------------------------------------------------------
 		;PS2 initialization:
 
@@ -78,9 +81,6 @@ START
 
 ;MAIN CYCLE:
     	  
-		
-		ld a,h'0C			; Set charcol variable to default value
-        	ld (current_pen),a
 		ld de, h'0000		; Set Y=0 , X=0
 	  	ld (cursor_y), de
 		ld hl , M_HEAD1
@@ -98,9 +98,9 @@ START
 		;-------------------------------------------------------
 		;initialization for inputing string:
 
-MAIN		call get_address
-		;LD HL, h'c000		; address on screen (first line)
-		LD DE, h'5900		;curMAX + curNOW
+MAIN		
+		call get_address		; address on screen of command line buffer 
+		LD DE, h'5900		; curMAX + curNOW
 
 		;curMAX - lenght of editing string
 		;curNOW - cursor starting position

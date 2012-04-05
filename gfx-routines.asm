@@ -204,15 +204,15 @@ cls_text
 		ld hl, h'C000
 		ld de, h'C000+1
 		
-		ld b, 36		; 36 lines to clear
-SCREEN		push bc
+		ld b, 36			; 36 lines to clear
+SCREEN	push bc
 		ld (hl), ' '
 		ld bc, 128
-		ldir			; fill line (symbols)
+		ldir				; fill line (symbols)
 		
-		ld (hl), a		; A - color
+		ld (hl), a			; A - color
 		ld bc, 128
-		ldir			; fill line (attributes)
+		ldir				; fill line (attributes)
 		pop bc
 		djnz SCREEN
 		ret

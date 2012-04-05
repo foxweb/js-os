@@ -1,6 +1,6 @@
 ###############################################################################
 #                                                                             #
-#     IAR Systems Z80/64180 Assembler V4.06A/W32 03/Apr/2012  23:00:38        #
+#     IAR Systems Z80/64180 Assembler V4.06A/W32 05/Apr/2012  19:29:03        #
 #     Copyright 2001 IAR Systems. All rights reserved.                        #
 #                                                                             #
 #           Target option =  z80                                              #
@@ -30,219 +30,218 @@
      17    000082 1605                     ld d, h'5
      18    000084 CD....                   call set_ram_pager
      19    000087 310060                   ld sp, stck
-     20    00008A 3E0C                     ld a,h'0C                       ;
-                                                 Set charcol variable to
-                                                 default value
-     21    00008C 32015B                   ld (current_pen),a
-     22    00008F 110000                   LD DE,h'0000            ; Set XYPOS
+     20    00008A CD....                   call load_font
+     21    00008D AF                       xor a
+     22    00008E D3FE                     out (254), a
+     23    000090 0612                     ld b,h'12
+     24    000092 1602                     ld d, h'2
+     25    000094 CD....                   call set_ram_pager
+     26    000097 CD....                   call LD_64_PAL          ; Load
+                                                                    default 64
+                                                                    colour
+                                                                    palette
+     27    00009A 2103C0                   ld hl, h'c003           ; Hopefully
+                                                                    set 360x288
+                                                                    text
+                                                                    ?
+     28    00009D CD....                   call set_video_mode
+     29    0000A0 0613                     ld b,h'13
+     30    0000A2 16F8                     ld d, txpage
+     31    0000A4 CD....                   call set_ram_pager
+     32    0000A7                          
+     33    0000A7                          
+     34    0000A7           ; Setup system variables
+     35    0000A7                          
+     36    0000A7          
+     37    0000A7 3E0F                     ld a, h'0F                      ;
+                                                  Set charcol variable to
+                                                  default value
+     38    0000A9 32015B                   ld (current_pen), a
+     39    0000AC 3E00                     ld a, h'0
+     40    0000AE 32025B                   ld (border_colour), a
+     41    0000B1 110000                   ld de,h'0000            ; Set XYPOS
                                                                     D - Y , E -
                                                                     X to the
                                                                     default of
                                                                     0,0
-     23    000092 ED53035B                 LD (cursor_y),DE
-     24    000096 CD....                   call load_font
-     25    000099 AF                       xor a
-     26    00009A D3FE                     out (254), a
-     27    00009C 0612                     ld b,h'12
-     28    00009E 1602                     ld d, h'2
-     29    0000A0 CD....                   call set_ram_pager
-     30    0000A3 CD....                   call LD_64_PAL          ; Load
-                                                                    default 64
-                                                                    colour
-                                                                    palette
-     31    0000A6 2103C0                   ld hl, h'c003           ; Hopefully
-                                                                    set 360x288
-                                                                    text
-                                                                    ?
-     32    0000A9 CD....                   call set_video_mode
-     33    0000AC 0613                     ld b,h'13
-     34    0000AE 16F8                     ld d, txpage
-     35    0000B0 CD....                   call set_ram_pager
-     36    0000B3 CD....                   call cls_text
-     37    0000B6 3E00                     ld a, h'0
-     38    0000B8 32025B                   ld (border_colour), a
-     39    0000BB CD....                   call set_border
-     40    0000BE                          
-     41    0000BE           ; Setup system variables
-     42    0000BE          
-     43    0000BE 3E01                     ld a, 1
-     44    0000C0 32085B                   ld (cursorstatus), a
-     45    0000C3 3E64                     ld a, 100
-     46    0000C5 32075B                   ld (cursorflashtimer), a
-     47    0000C8 3E0F                     ld a, h'0f
-     48    0000CA 32015B                   ld (current_pen), a
-     49    0000CD 3E19                     ld a, 25                        ;
+     42    0000B4 ED53035B                 ld (cursor_y), de
+     43    0000B8 3E01                     ld a, 1
+     44    0000BA 32085B                   ld (cursorstatus), a
+     45    0000BD 3E64                     ld a, 100
+     46    0000BF 32075B                   ld (cursorflashtimer), a
+     47    0000C2 3E19                     ld a, 25                        ;
                                                   Auto repeat default
                                                   value
-     50    0000CF 320B5B                   ld (key_repeat), a
-     51    0000D2          
-     52    0000D2                          ;-----------------------------------
+     48    0000C4 320B5B                   ld (key_repeat), a
+     49    0000C7                          
+     50    0000C7                          ;-----------------------------------
                            -----------------------------------
-     53    0000D2                          ;PS2 initialization:
-     54    0000D2          
-     55    0000D2 01F7EF                   LD BC,h'EFF7
-     56    0000D5 3E80                     LD A,h'80
-     57    0000D7 ED79                     OUT (C),A
-     58    0000D9 01F7DF                   LD BC,h'DFF7
-     59    0000DC 3EF0                     LD A,h'F0
-     60    0000DE ED79                     OUT (C),A
-     61    0000E0 01F7BF                   LD BC,h'BFF7
-     62    0000E3 3E02                     LD A,h'02
-     63    0000E5 ED79                     OUT (C),A
-     64    0000E7                          
-     65    0000E7 CD....                   CALL AGU; reset win keyz and clear
+     51    0000C7                          
+     52    0000C7 CD....                   call cls_text
+     53    0000CA CD....                   call set_border
+     54    0000CD                          
+     55    0000CD                          ;-----------------------------------
+                           -----------------------------------
+     56    0000CD                          ;PS2 initialization:
+     57    0000CD          
+     58    0000CD 01F7EF                   LD BC,h'EFF7
+     59    0000D0 3E80                     LD A,h'80
+     60    0000D2 ED79                     OUT (C),A
+     61    0000D4 01F7DF                   LD BC,h'DFF7
+     62    0000D7 3EF0                     LD A,h'F0
+     63    0000D9 ED79                     OUT (C),A
+     64    0000DB 01F7BF                   LD BC,h'BFF7
+     65    0000DE 3E02                     LD A,h'02
+     66    0000E0 ED79                     OUT (C),A
+     67    0000E2                          
+     68    0000E2 CD....                   CALL AGU; reset win keyz and clear
                                                       KB buffer
-     66    0000EA          
-     67    0000EA                          ;-----------------------------------
+     69    0000E5          
+     70    0000E5                          ;-----------------------------------
                            -----------------------------------
-     68    0000EA                          ;Initialise IM2 interrupts:
-     69    0000EA          
-     70    0000EA 21....                   LD HL, I_N_T
-     71    0000ED 22FF5B                   LD (h'5BFF), HL         ; Address
+     71    0000E5                          ;Initialise IM2 interrupts:
+     72    0000E5          
+     73    0000E5 21....                   LD HL, I_N_T
+     74    0000E8 22FF5B                   LD (h'5BFF), HL         ; Address
                                                                     for IM2
                                                                     mode
                                                                     routine.
-     72    0000F0 F3                       DI
-     73    0000F1 3E5B                     LD A, h'5B
-     74    0000F3 ED47                     LD I, A
-     75    0000F5 ED5E                     IM 2
-     76    0000F7          
-     77    0000F7                          ;-----------------------------------
+     75    0000EB F3                       DI
+     76    0000EC 3E5B                     LD A, h'5B
+     77    0000EE ED47                     LD I, A
+     78    0000F0 ED5E                     IM 2
+     79    0000F2          
+     80    0000F2                          ;-----------------------------------
                            -----------------------------------
-     78    0000F7          
-     79    0000F7          ;MAIN CYCLE:
-     80    0000F7                    
-     81    0000F7                          
-     82    0000F7 3E0C                     ld a,h'0C                       ;
-                                                 Set charcol variable to
-                                                 default value
-     83    0000F9 32015B                   ld (current_pen),a
-     84    0000FC 110000                   ld de, h'0000           ; Set Y=0 ,
+     81    0000F2          
+     82    0000F2          ;MAIN CYCLE:
+     83    0000F2                    
+     84    0000F2 110000                   ld de, h'0000           ; Set Y=0 ,
                                                                     X=0
-     85    0000FF ED53035B                 ld (cursor_y), de
-     86    000103 21....                   ld hl , M_HEAD1
-     87    000106 CD....                   call print_msg_c
-     88    000109 3E0F                     ld a, h'0f
-     89    00010B 32015B                   ld (current_pen), a
-     90    00010E 110001                   ld de, h'0100           ; Set Y=1 ,
+     85    0000F5 ED53035B                 ld (cursor_y), de
+     86    0000F9 21....                   ld hl , M_HEAD1
+     87    0000FC CD....                   call print_msg_c
+     88    0000FF 3E0F                     ld a, h'0f
+     89    000101 32015B                   ld (current_pen), a
+     90    000104 110001                   ld de, h'0100           ; Set Y=1 ,
                                                                     X=0
-     91    000111 ED53035B                 ld (cursor_y), de
-     92    000115 21....                   ld hl , M_HEAD2
-     93    000118 CD....                   call print_msg_c
-     94    00011B                          
-     95    00011B 110005                   ld de, h'0500                   ; Y
+     91    000107 ED53035B                 ld (cursor_y), de
+     92    00010B 21....                   ld hl , M_HEAD2
+     93    00010E CD....                   call print_msg_c
+     94    000111                          
+     95    000111 110005                   ld de, h'0500                   ; Y
                                                    = 5 , X = 0 setup powerup
                                                    cursor position
-     96    00011E ED53035B                 ld (cursor_y), de
-     97    000122                          
-     98    000122                          ;-----------------------------------
+     96    000114 ED53035B                 ld (cursor_y), de
+     97    000118                          
+     98    000118                          ;-----------------------------------
                            --------------------
-     99    000122                          ;initialization for inputing
+     99    000118                          ;initialization for inputing
                             string:
-    100    000122          
-    101    000122 CD....   MAIN            call get_address
-    102    000125                          ;LD HL, h'c000          ; address on
-                            screen (first line)
-    103    000125 110059                   LD DE, h'5900           ;curMAX +
+    100    000118          
+    101    000118          MAIN            
+    102    000118 CD....                   call get_address                ;
+  address on screen of command line buffer 
+    103    00011B 110059                   LD DE, h'5900           ; curMAX +
                                                                     curNOW
-    104    000128          
-    105    000128                          ;curMAX - lenght of editing
+    104    00011E          
+    105    00011E                          ;curMAX - lenght of editing
                             string
-    106    000128                          ;curNOW - cursor starting position
-    107    000128          
-    108    000128 3EFF                     LD A, h'ff                      ;
+    106    00011E                          ;curNOW - cursor starting position
+    107    00011E          
+    108    00011E 3EFF                     LD A, h'ff                      ;
                                                   #FF - initialization
-    109    00012A CD....                   CALL ISTR
-    110    00012D                          
-    111    00012D                          ;-----------------------------------
+    109    000120 CD....                   CALL ISTR
+    110    000123                          
+    111    000123                          ;-----------------------------------
                            --------------------
-    112    00012D                          
-    113    00012D FB       MAIN1           ei
-    114    00012E 76                       halt
-    115    00012F                          ;if ENTER pressed then parse:
-    116    00012F CD....                   CALL ENKE
-    117    000132 2006                     jr nz, enter
-    118    000134          
-    119    000134          ;editing string:
-    120    000134                          
-    121    000134 AF                       XOR A                           ; 0
+    112    000123                          
+    113    000123 FB       MAIN1           ei
+    114    000124 76                       halt
+    115    000125                          ;if ENTER pressed then parse:
+    116    000125 CD....                   CALL ENKE
+    117    000128 2006                     jr nz, enter
+    118    00012A          
+    119    00012A          ;editing string:
+    120    00012A                          
+    121    00012A AF                       XOR A                           ; 0
   - inputing
-    122    000135 CD....                   CALL ISTR
-    123    000138 18F3                     JR MAIN1
-    124    00013A          
-    125    00013A          enter
-    126    00013A ED5B035B                 ld de, (cursor_y)
-    127    00013E 14                       inc d
-    128    00013F ED53035B                 ld (cursor_y), de
-    129    000143 3E01                     ld a, 01                        ;
+    122    00012B CD....                   CALL ISTR
+    123    00012E 18F3                     JR MAIN1
+    124    000130          
+    125    000130          enter
+    126    000130 ED5B035B                 ld de, (cursor_y)
+    127    000134 14                       inc d
+    128    000135 ED53035B                 ld (cursor_y), de
+    129    000139 3E01                     ld a, 01                        ;
                                                   Terminate editing string in
                                                   HL
-    130    000145 CD....                   call ISTR
-    131    000148 E5                       push hl                 ; copy HL
+    130    00013B CD....                   call ISTR
+    131    00013E E5                       push hl                 ; copy HL
                                                                     into
                                                                     DE
-    132    000149 D1                       pop de
-    133    00014A CD....                   call parse
-    134    00014D 18D3                     jr MAIN
-    135    00014F                          
-    136    00014F          
-    137    00014F          ;---------------------------------------------------
+    132    00013F D1                       pop de
+    133    000140 CD....                   call parse
+    134    000143 18D3                     jr MAIN
+    135    000145                          
+    136    000145          
+    137    000145          ;---------------------------------------------------
                            -------------------
-    138    00014F          ; IM2 Interrupt handler:
-    139    00014F F5       I_N_T           PUSH AF
-    140    000150 C5                       PUSH BC
-    141    000151 D5                       PUSH DE
-    142    000152 E5                       PUSH HL
-    143    000153 DDE5                     PUSH IX
-    144    000155 D9                       EXX
-    145    000156 08                       EX AF, AF
-    146    000157 F5                       PUSH AF
-    147    000158 C5                       PUSH BC
-    148    000159 D5                       PUSH DE
-    149    00015A E5                       PUSH HL
-    150    00015B          
-    151    00015B CD....                   CALL PSDII      ; Get value from PS2
+    138    000145          ; IM2 Interrupt handler:
+    139    000145 F5       I_N_T           PUSH AF
+    140    000146 C5                       PUSH BC
+    141    000147 D5                       PUSH DE
+    142    000148 E5                       PUSH HL
+    143    000149 DDE5                     PUSH IX
+    144    00014B D9                       EXX
+    145    00014C 08                       EX AF, AF
+    146    00014D F5                       PUSH AF
+    147    00014E C5                       PUSH BC
+    148    00014F D5                       PUSH DE
+    149    000150 E5                       PUSH HL
+    150    000151          
+    151    000151 CD....                   CALL PSDII      ; Get value from PS2
                                                             keyboard buffer.
-    152    00015E          
-    153    00015E E1                       POP HL
-    154    00015F D1                       POP DE
-    155    000160 C1                       POP BC
-    156    000161 F1                       POP AF
-    157    000162 D9                       EXX
-    158    000163 08                       EX AF, AF
-    159    000164 DDE1                     POP IX
-    160    000166 E1                       POP HL
-    161    000167 D1                       POP DE
-    162    000168 C1                       POP BC
-    163    000169 F1                       POP AF
-    164    00016A FB                       EI
-    165    00016B C9                       RET
-    166    00016C          
-    167    00016C          ;---------------------------------------------------
+    152    000154          
+    153    000154 E1                       POP HL
+    154    000155 D1                       POP DE
+    155    000156 C1                       POP BC
+    156    000157 F1                       POP AF
+    157    000158 D9                       EXX
+    158    000159 08                       EX AF, AF
+    159    00015A DDE1                     POP IX
+    160    00015C E1                       POP HL
+    161    00015D D1                       POP DE
+    162    00015E C1                       POP BC
+    163    00015F F1                       POP AF
+    164    000160 FB                       EI
+    165    000161 C9                       RET
+    166    000162          
+    167    000162          ;---------------------------------------------------
                            -------------------
-    168    00016C          
-    169    00016C          #include "nvram.asm"
-    170    0001FA          #include "gfx-routines.asm"
-    171    000441          #include "maths-routines.asm"
-    172    00053B          #include "parser.asm"
-    173    0005D0          #include "ps2_handler.asm"
-    174    000987          #include "commands/test.asm"
-    175    000992          #include "commands/time.asm"
-    176    0009CE          #include "commands/date.asm"
-    177    000A14          #include "commands/cls.asm"
-    178    000A20          #include "commands/reboot.asm"
-    179    000A23          #include "booter.asm"
-    180    00112A          #include "arrays.asm"
-    181    001430          #include "restarts.asm"
+    168    000162          
+    169    000162          #include "nvram.asm"
+    170    0001F0          #include "gfx-routines.asm"
+    171    000437          #include "maths-routines.asm"
+    172    000531          #include "parser.asm"
+    173    0005C6          #include "ps2_handler.asm"
+    174    00097D          #include "commands/test.asm"
+    175    000988          #include "commands/time.asm"
+    176    0009C4          #include "commands/date.asm"
+    177    000A0A          #include "commands/cls.asm"
+    178    000A16          #include "commands/reboot.asm"
+    179    000A19          #include "booter.asm"
+    180    001120          #include "arrays.asm"
+    181    001426          #include "restarts.asm"
     182    000068          
     183    000068          
     184    000068          
     185    000068                  end
 ##############################
-#          CRC:2B0           #
+#          CRC:66E4          #
 #        Errors:   0         #
 #        Warnings: 0         #
-#        Bytes: 5040         #
+#        Bytes: 5030         #
 ##############################
 
 
