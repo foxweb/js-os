@@ -1,5 +1,7 @@
 TODO:
 
+Change code to use Oshonsoft's Z80 simulator and TASM.
+
 Sort out variables - Get everything moved as low as possible in ram as os starts at $0000
 
 make cursor flash routine - At the moment cursor is solid use variable cursorstatus and cursorflashtimer
